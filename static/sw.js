@@ -1,6 +1,5 @@
 const CACHE_NAME = 'jhcgn-pwa-v1';
 const STATIC_ASSETS = [
-  '/',
   '/manifest.json'
 ];
 
