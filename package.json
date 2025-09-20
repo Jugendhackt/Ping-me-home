@@ -32,8 +32,10 @@
 		"workbox-build": "^7.3.0"
 	},
 	"dependencies": {
+		"@types/web-push": "^3.6.4",
 		"dotenv": "^17.2.2",
 		"firebase": "^12.3.0",
-		"firebase-admin": "^13.5.0"
+		"firebase-admin": "^13.5.0",
+		"web-push": "^3.6.7"
 	}
 }
