@@ -200,12 +200,6 @@
 		transform: translateY(-1px);
 	}
 
-
-
-
-
-	
-
 	.btn-install {
 		background: linear-gradient(135deg, #10b981 0%, #047857 100%);
 		color: white;
