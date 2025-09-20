@@ -19,7 +19,7 @@
 		if (!email || !password || !confirmPassword || !displayName) {
 			error = 'Please fill in all fields';
 			return;
-		}
+		} 
 
 		if (password !== confirmPassword) {
 			error = 'Passwords do not match';
@@ -119,7 +119,7 @@
 				<label for="email">Email Address</label>
 				<input
 					id="email"
-					type="email"
+					type="text"
 					bind:value={email}
 					placeholder="Enter your email"
 					required
