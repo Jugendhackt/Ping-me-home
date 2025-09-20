@@ -579,7 +579,7 @@
 		word-break: break-word;
 		flex: 1;
 		line-height: 1.3;
-		background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
+		background: var(--text-gradient);
 		background-clip: text;
 		-webkit-background-clip: text;
 		-webkit-text-fill-color: transparent;

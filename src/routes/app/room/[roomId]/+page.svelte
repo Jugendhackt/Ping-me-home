@@ -114,7 +114,7 @@
         align-items: center;
         padding: 0.5rem;
         background: var(--bg-primary);
-        border-radius: 4px;
+        border-radius: 8px;
         border: 1px solid var(--border-color);
     }
 
@@ -149,6 +149,10 @@
     h1 {
         color: var(--text-primary);
         margin-bottom: 1rem;
+        background: var(--text-gradient);
+        background-clip: text;
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
     }
 
     h2 {
