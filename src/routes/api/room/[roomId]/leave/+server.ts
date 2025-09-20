@@ -1,6 +1,5 @@
-import { deleteRoom, validateRoomApiRequest } from "$lib/server/apiUtils";
+import { deleteRoom, validateRoomApiRequest, updateRoomMembership } from "$lib/server/apiUtils";
 import { json, type RequestHandler } from "@sveltejs/kit";
-import { update } from "firebase/database";
 
 export const POST: RequestHandler = async ({ params, locals }) => {
     const { room, user, roomRef } = await validateRoomApiRequest(params.roomId, locals, {
@@ -8,10 +7,13 @@ export const POST: RequestHandler = async ({ params, locals }) => {
     });
 
     if (room.members[user.uid] === 'owner') {
-        deleteRoom(room, roomRef);
+        // Owner verlässt = Raum löschen
+        await deleteRoom(room, roomRef);
     } else {
-        delete room.members[user.uid];
-        update(roomRef, room);
+        // Normales Member verlässt
+        await updateRoomMembership(room, roomRef, {
+            [user.uid]: null // null = entfernen
+        });
     }
 
     return json({ success: true });

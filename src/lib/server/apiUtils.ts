@@ -1,7 +1,7 @@
 import { db } from "$lib/FirebaseConfig";
 import type { Room, RoomRole, User } from "$lib/types";
 import { error } from "@sveltejs/kit";
-import { get, ref, remove, type DatabaseReference } from "firebase/database";
+import { get, ref, remove, update, type DatabaseReference } from "firebase/database";
 
 interface RoomApiHandlerConfig {
     requiredUserRole: RoomRole | RoomRole[] | undefined,
@@ -59,9 +59,50 @@ export async function validateRoomApiRequest(
 }
 
 export async function deleteRoom(room: Room, roomRef: DatabaseReference) {
-    remove(roomRef);
     // TODO handle other stuff
     // TODO loop through users and delete invites
+    remove(roomRef);
+    // Lösche den Raum und alle User-Room-Zuordnungen
+    const updates: Record<string, any> = {};
+    
+    // Lösche den Raum selbst
+    updates[`rooms/${roomRef.key}`] = null;
+    
+    // Entferne den Raum aus allen User-Listen
+    Object.keys(room.members).forEach(userId => {
+        updates[`users/${userId}/rooms/${roomRef.key}`] = null;
+    });
+    
+    await update(ref(db), updates);
+}
+
+/**
+ * Aktualisiert Room-Mitgliedschaften und User-Room-Zuordnungen konsistent
+ */
+export async function updateRoomMembership(
+    room: Room, 
+    roomRef: DatabaseReference,
+    membershipChanges: Record<string, RoomRole | null> // null = entfernen
+): Promise<void> {
+    const updates: Record<string, any> = {};
+    
+    // Aktualisiere Room-Members
+    Object.entries(membershipChanges).forEach(([userId, role]) => {
+        if (role === null) {
+            room.members = room.members || {};
+            delete room.members[userId];
+            updates[`users/${userId}/rooms/${roomRef.key}`] = null;
+        } else {
+            room.members = room.members || {};
+            room.members[userId] = role;
+            updates[`users/${userId}/rooms/${roomRef.key}`] = role;
+        }
+    });
+    
+    // Update das Room-Object
+    updates[`rooms/${roomRef.key}`] = room;
+    
+    await update(ref(db), updates);
 }
 
 export function generateRandomId(): string {

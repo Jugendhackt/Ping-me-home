@@ -1,5 +1,5 @@
 import { db } from "$lib/FirebaseConfig";
-import { validateRoomApiRequest } from "$lib/server/apiUtils";
+import { validateRoomApiRequest, updateRoomMembership } from "$lib/server/apiUtils";
 import { json, type RequestHandler } from "@sveltejs/kit";
 import { ref, update } from "firebase/database";
 
@@ -8,8 +8,11 @@ export const POST: RequestHandler = async ({ params, locals }) => {
         requiredUserRole: 'invited',
     });
 
-    delete room.members[user.uid];
-    update(roomRef, room);
+    // Entferne User aus den Invites
+    await updateRoomMembership(room, roomRef, {
+        [user.uid]: null // null = entfernen
+    });
+    
 
     const userRef = ref(db, `users/${user.uid}`);
     user.pendingInvites = user.pendingInvites?.filter(invite => invite !== params.roomId) || [];

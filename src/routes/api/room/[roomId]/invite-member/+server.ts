@@ -1,5 +1,5 @@
 import { db } from "$lib/FirebaseConfig";
-import { validateRoomApiRequest } from "$lib/server/apiUtils";
+import { validateRoomApiRequest, updateRoomMembership } from "$lib/server/apiUtils";
 import type { User } from "$lib/types";
 import { error, json, type RequestHandler } from "@sveltejs/kit";
 import { get, ref, update } from "firebase/database";
@@ -25,8 +25,11 @@ export const POST: RequestHandler = async ({ params, locals, request }) => {
         throw error(400, 'This user is already invited or a member!');
     }
 
-    room.members[userToAdd] = 'invited';
-    update(roomRef, room);
+    // Add User as 'invited' hinzu
+    await updateRoomMembership(room, roomRef, {
+        [userToAdd]: 'invited'
+    });
+    
     
     const pendingInvites = Array.isArray(userToAddData.pendingInvites)
         ? [...userToAddData.pendingInvites, params.roomId!]
