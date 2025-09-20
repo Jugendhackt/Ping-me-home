@@ -265,7 +265,7 @@
 	}
 	
 	.logout-item {
-		color: var(--accent-color);
+		color: var(--error-color);
 	}
 	
 	.logout-item:hover {
