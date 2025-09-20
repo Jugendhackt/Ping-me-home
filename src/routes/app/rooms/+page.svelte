@@ -103,12 +103,16 @@
 		allowUrlJoining = true;
 	}
 
-	function getRoleIcon(role: string): string {
-		switch (role) {
-			case 'owner': return '👑';
-			case 'member': return '👤';
-			case 'invited': return '📬';
-			default: return '❓';
+	function handleModalKeydown(e: KeyboardEvent) {
+		if (e.key === 'Escape') {
+			closeCreateModal();
+		}
+	}
+
+	function handleBackdropKeydown(e: KeyboardEvent) {
+		if (e.key === 'Enter' || e.key === ' ') {
+			e.preventDefault();
+			closeCreateModal();
 		}
 	}
 
@@ -118,6 +122,15 @@
 			case 'member': return 'Member';
 			case 'invited': return 'Invited';
 			default: return role;
+		}
+	}
+
+	function getRoleClass(role: string): string {
+		switch (role) {
+			case 'owner': return 'role-owner';
+			case 'member': return 'role-member';
+			case 'invited': return 'role-invited';
+			default: return 'role-default';
 		}
 	}
 
@@ -142,12 +155,11 @@
 	<div class="page-header">
 		<div class="header-content">
 			<div class="title-section">
-				<h1>🏠 My Rooms</h1>
+				<h1>My Rooms</h1>
 				<p>Manage and browse your room memberships</p>
 			</div>
 			<div class="header-actions">
 				<button onclick={openCreateModal} class="btn btn-primary">
-					<span>➕</span>
 					Create Room
 				</button>
 			</div>
@@ -211,22 +223,19 @@
 					<div class="room-header">
 						<div class="room-title">
 							<h3 class="room-name">{room.name}</h3>
-							<div class="room-role">
-								<span class="role-icon">{getRoleIcon(room.role)}</span>
+							<div class="room-role {getRoleClass(room.role)}">
 								<span class="role-text">{getRoleDisplayName(room.role)}</span>
 							</div>
 						</div>
 					</div>
 
 					<div class="room-info">
-						<div class="info-item">
-							<span class="info-icon">👥</span>
+						<div class="info-item info-members">
 							<span class="info-text">{room.memberCount} member{room.memberCount !== 1 ? 's' : ''}</span>
 						</div>
 						{#if room.allowUrlJoining}
-							<div class="info-item">
-								<span class="info-icon">🌐</span>
-								<span class="info-text">Public joining</span>
+							<div class="info-item info-public">
+								<span class="info-text">Public</span>
 							</div>
 						{/if}
 					</div>
@@ -234,10 +243,8 @@
 					<div class="room-actions">
 						<a href="/app/room/{room.roomId}" class="btn btn-secondary">
 							{#if room.role === 'invited'}
-								<span>📬</span>
 								View Invite
 							{:else}
-								<span>🚪</span>
 								Enter Room
 							{/if}
 						</a>
@@ -249,10 +256,8 @@
 								onclick={() => deleteRoom(room.roomId, room.name)}
 							>
 								{#if deletingRoomId === room.roomId}
-									<span class="spinner">⏳</span>
 									Deleting...
 								{:else}
-									<span>🗑️</span>
 									Delete
 								{/if}
 							</button>
@@ -266,14 +271,10 @@
 
 <!-- Create Room Modal -->
 {#if showCreateModal}
-	<!-- svelte-ignore a11y-click-events-have-key-events -->
-	<!-- svelte-ignore a11y-no-static-element-interactions -->
-	<div class="modal-backdrop" onclick={closeCreateModal}>
-		<!-- svelte-ignore a11y-click-events-have-key-events -->
-		<!-- svelte-ignore a11y-no-static-element-interactions -->
-		<div class="modal-content" onclick={(e) => e.stopPropagation()}>
+	<div class="modal-backdrop" onclick={closeCreateModal} onkeydown={handleBackdropKeydown} role="dialog" aria-modal="true" tabindex="-1">
+		<div class="modal-content" onclick={(e) => e.stopPropagation()} onkeydown={handleModalKeydown} role="document"  tabindex="0">
 			<div class="modal-header">
-				<h2>🏠 Create New Room</h2>
+				<h2>Create New Room</h2>
 				<button class="modal-close" onclick={closeCreateModal} aria-label="Close modal">✕</button>
 			</div>
 
@@ -323,10 +324,8 @@
 						class="btn btn-primary"
 					>
 						{#if isCreating}
-							<span class="spinner">⏳</span>
 							Creating...
 						{:else}
-							<span>🏠</span>
 							Create Room
 						{/if}
 					</button>
@@ -508,16 +507,34 @@
 	.room-card {
 		background: var(--bg-secondary);
 		border: 1px solid var(--border-color);
-		border-radius: 12px;
-		padding: 1.5rem;
-		transition: all 0.2s ease;
-		box-shadow: var(--shadow-sm);
+		border-radius: 16px;
+		padding: 1.75rem;
+		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.1);
+		position: relative;
+		overflow: hidden;
+	}
+
+	.room-card::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		height: 3px;
+		background: linear-gradient(90deg, var(--accent-color), #4338ca);
+		opacity: 0;
+		transition: opacity 0.3s ease;
+	}
+
+	.room-card:hover::before {
+		opacity: 1;
 	}
 
 	.room-card:hover {
 		border-color: var(--border-hover);
-		box-shadow: var(--shadow-md);
-		transform: translateY(-2px);
+		box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.15);
+		transform: translateY(-4px);
 	}
 
 	.list-view .room-card {
@@ -555,23 +572,55 @@
 	}
 
 	.room-name {
-		font-size: 1.25rem;
-		font-weight: 600;
+		font-size: 1.375rem;
+		font-weight: 700;
 		color: var(--text-primary);
 		margin: 0;
 		word-break: break-word;
 		flex: 1;
+		line-height: 1.3;
+		background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
+		background-clip: text;
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
 	}
 
 	.room-role {
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
-		background: var(--bg-tertiary);
-		padding: 0.5rem 0.75rem;
-		border-radius: 20px;
+		padding: 0.4rem 0.8rem;
+		border-radius: 12px;
 		white-space: nowrap;
-		border: 1px solid var(--border-color);
+		font-size: 0.75rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.025em;
+		border: 1px solid;
+	}
+
+	.role-owner {
+		background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+		color: #1f2937;
+		border-color: #d97706;
+	}
+
+	.role-member {
+		background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+		color: white;
+		border-color: #2563eb;
+	}
+
+	.role-invited {
+		background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+		color: white;
+		border-color: #059669;
+	}
+
+	.role-default {
+		background: var(--bg-tertiary);
+		color: var(--text-secondary);
+		border-color: var(--border-color);
 	}
 
 	.role-icon {
@@ -579,9 +628,9 @@
 	}
 
 	.role-text {
-		font-size: 0.8rem;
-		font-weight: 500;
-		color: var(--text-secondary);
+		font-size: 0.75rem;
+		font-weight: 600;
+		letter-spacing: 0.025em;
 	}
 
 	/* Room Info */
@@ -597,9 +646,23 @@
 		align-items: center;
 		gap: 0.5rem;
 		background: var(--bg-tertiary);
-		padding: 0.4rem 0.75rem;
+		padding: 0.5rem 0.75rem;
 		border-radius: 8px;
 		border: 1px solid var(--border-color);
+		font-size: 0.8rem;
+		font-weight: 500;
+	}
+
+	.info-members {
+		background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+		border-color: #d1d5db;
+		color: #374151;
+	}
+
+	.info-public {
+		background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+		border-color: #86efac;
+		color: #166534;
 	}
 
 	.info-icon {
@@ -607,8 +670,7 @@
 	}
 
 	.info-text {
-		font-size: 0.85rem;
-		color: var(--text-secondary);
+		font-size: 0.8rem;
 		font-weight: 500;
 	}
 
@@ -622,51 +684,79 @@
 	.btn {
 		display: inline-flex;
 		align-items: center;
+		justify-content: center;
 		gap: 0.5rem;
-		padding: 0.75rem 1rem;
+		padding: 0.75rem 1.25rem;
 		border: 1px solid var(--border-color);
 		border-radius: 8px;
 		text-decoration: none;
-		font-weight: 500;
-		font-size: 0.9rem;
+		font-weight: 600;
+		font-size: 0.875rem;
 		cursor: pointer;
-		transition: all 0.2s ease;
+		transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 		background: var(--bg-tertiary);
 		color: var(--text-primary);
+		position: relative;
+		overflow: hidden;
+		min-height: 40px;
+	}
+
+	.btn::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: -100%;
+		width: 100%;
+		height: 100%;
+		background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+		transition: left 0.5s;
+	}
+
+	.btn:hover::before {
+		left: 100%;
 	}
 
 	.btn:hover {
 		border-color: var(--border-hover);
 		background: var(--bg-hover);
 		transform: translateY(-1px);
-		box-shadow: var(--shadow-sm);
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 	}
 
 	.btn-primary {
-		background: var(--accent-color);
+		background: linear-gradient(135deg, var(--accent-color) 0%, #4338ca 100%);
 		color: white;
 		border-color: var(--accent-color);
+		box-shadow: 0 2px 4px rgba(102, 126, 234, 0.2);
 	}
 
 	.btn-primary:hover {
-		background: var(--accent-hover);
+		background: linear-gradient(135deg, var(--accent-hover) 0%, #3730a3 100%);
 		border-color: var(--accent-hover);
+		box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
 	}
 
 	.btn-secondary {
-		background: var(--bg-secondary);
+		background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
 		border-color: var(--border-color);
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+	}
+
+	.btn-secondary:hover {
+		background: linear-gradient(135deg, var(--bg-hover) 0%, var(--bg-secondary) 100%);
 	}
 
 	.btn-danger {
-		background: var(--error-color);
+		background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
 		color: white;
-		border-color: var(--error-color);
+		border-color: #ef4444;
+		box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
 	}
 
 	.btn-danger:hover {
-		background: #dc2626;
+		background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
 		border-color: #dc2626;
+		box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
 	}
 
 	.btn:disabled {
@@ -901,6 +991,7 @@
 		cursor: pointer;
 		font-weight: normal;
 		margin-bottom: 0;
+		line-height: 1.5;
 	}
 
 	.checkbox-input {
@@ -908,15 +999,18 @@
 	}
 
 	.checkbox-custom {
-		width: 20px;
-		height: 20px;
+		width: 18px;
+		height: 18px;
 		border: 2px solid var(--border-color);
 		border-radius: 4px;
 		background: var(--bg-secondary);
 		transition: all 0.2s ease;
 		flex-shrink: 0;
 		position: relative;
-		margin-top: 2px;
+		margin-top: 3px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 	}
 
 	.checkbox-input:checked + .checkbox-custom {
@@ -926,13 +1020,10 @@
 
 	.checkbox-input:checked + .checkbox-custom::after {
 		content: '✓';
-		position: absolute;
-		top: 50%;
-		left: 50%;
-		transform: translate(-50%, -50%);
 		color: white;
-		font-size: 12px;
+		font-size: 11px;
 		font-weight: bold;
+		line-height: 1;
 	}
 
 	.checkbox-input:disabled + .checkbox-custom {
@@ -942,7 +1033,8 @@
 
 	.checkbox-text {
 		flex: 1;
-		line-height: 1.4;
+		line-height: 1.5;
+		margin-top: 1px;
 	}
 
 	.checkbox-text small {
@@ -950,7 +1042,7 @@
 		color: var(--text-muted);
 		font-size: 0.8rem;
 		margin-top: 0.25rem;
-		line-height: 1.3;
+		line-height: 1.4;
 	}
 
 	.modal-actions {
