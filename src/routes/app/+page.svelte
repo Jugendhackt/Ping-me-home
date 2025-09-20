@@ -309,9 +309,9 @@
 		align-items: center;
 		gap: 1rem;
 		padding: 1rem;
-		background: rgba(255, 255, 255, 0.7);
+		background: var(--bg-tertiary);
 		border-radius: 16px;
-		border: 1px solid rgba(255, 255, 255, 0.8);
+		border: 1px solid var(--border-color);
 		backdrop-filter: blur(10px);
 	}
 
@@ -340,15 +340,15 @@
 		justify-content: space-between;
 		align-items: center;
 		padding: 1rem;
-		background: rgba(255, 255, 255, 0.5);
+		background: var(--bg-secondary);
 		border-radius: 12px;
-		border: 1px solid rgba(255, 255, 255, 0.6);
+		border: 1px solid var(--border-color);
 		backdrop-filter: blur(5px);
 		transition: all 0.3s ease;
 	}
 
 	.info-item:hover {
-		background: rgba(255, 255, 255, 0.8);
+		background: var(--bg-hover);
 		transform: translateX(4px);
 	}
 
@@ -393,9 +393,9 @@
 		align-items: center;
 		gap: 1rem;
 		padding: 1.25rem;
-		background: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.6) 100%);
+		background: var(--bg-tertiary);
 		border-radius: 16px;
-		border: 1px solid rgba(255, 255, 255, 0.9);
+		border: 1px solid var(--border-color);
 		backdrop-filter: blur(10px);
 		transition: all 0.3s ease;
 	}
@@ -403,7 +403,7 @@
 	.activity-item:hover {
 		transform: translateY(-2px);
 		box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-		background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.8) 100%);
+		background: var(--bg-hover);
 	}
 
 	.activity-icon {
@@ -456,9 +456,9 @@
 		align-items: center;
 		gap: 1rem;
 		padding: 1.25rem;
-		background: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.6) 100%);
+		background: var(--bg-tertiary);
 		border-radius: 16px;
-		border: 1px solid rgba(255, 255, 255, 0.9);
+		border: 1px solid var(--border-color);
 		backdrop-filter: blur(10px);
 	}
 
