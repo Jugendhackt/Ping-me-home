@@ -41,6 +41,10 @@
 		goto('/register');
 	}
 	
+	function navigateToInfo() {
+		goto('/info');
+	}
+
 	async function handleInstallPWA() {
 		if (installPromptEvent) {
 			installPromptEvent.prompt();
@@ -64,9 +68,9 @@
 <div class="landing-container">
 	<div class="hero-section">
 		<div class="logo-area">
-			<h1 class="app-title">PMH</h1>
+			<h1 class="app-title">Ping me home</h1>
 			<p class="app-subtitle">
-				{isPWAMode ? 'Welcome back!' : 'Welcome to the PMH PWA'}
+				{isPWAMode ? 'Welcome back!' : 'Welcome to the Ping me home Web-App'}
 			</p>
 			{#if isPWAMode}
 				<p class="pwa-indicator">Running as PWA ✨</p>
@@ -86,6 +90,13 @@
 				onclick={navigateToRegister}
 			>
 				Create Account
+			</button>
+
+			<button 
+				class="btn btn-tertiary"
+				onclick={navigateToInfo}
+			>
+				What is Ping-me-home
 			</button>
 			
 			{#if showInstallPrompt && !isPWAMode}
@@ -160,7 +171,7 @@
 	.btn-primary:hover {
 		background: #f8f9fa;
 		transform: translateY(-2px);
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+		box-shadow: 0 4px 2px rgba(0, 0, 0, 0.15);
 	}
 	
 	.btn-secondary {
@@ -172,9 +183,29 @@
 	.btn-secondary:hover {
 		background: rgba(255, 255, 255, 0.2);
 		border-color: rgba(255, 255, 255, 0.5);
+		box-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
 		transform: translateY(-2px);
 	}
 	
+	.btn-tertiary {
+		background: rgba(255, 255, 255, 0.1);
+		color: white;
+		border: 2px solid rgba(255, 255, 255, 0.3);
+	}
+	
+	.btn-tertiary:hover {
+		background: rgba(255, 255, 255, 0.1);
+		border-color: rgba(255, 255, 255, 0.5);
+		box-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
+		transform: translateY(-1px);
+	}
+
+
+
+
+
+	
+
 	.btn-install {
 		background: linear-gradient(135deg, #10b981 0%, #047857 100%);
 		color: white;
