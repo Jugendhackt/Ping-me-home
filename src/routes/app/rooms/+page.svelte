@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
+	import { gridViewIcon, listViewIcon, searchIcon } from '$lib/components/Icons.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -170,7 +171,7 @@
 	<div class="controls-section">
 		<div class="search-bar">
 			<div class="search-input-wrapper">
-				<span class="search-icon">🔍</span>
+				<span class="search-icon align-center">{@render searchIcon()}</span>
 				<input 
 					type="text" 
 					placeholder="Search rooms..." 
@@ -182,20 +183,20 @@
 		
 		<div class="view-controls">
 			<button 
-				class="view-toggle"
+				class="view-toggle align-center"
 				class:active={viewMode === 'grid'}
 				onclick={() => viewMode = 'grid'}
 				aria-label="Grid view"
 			>
-				⊞
+				{@render gridViewIcon()}
 			</button>
 			<button 
-				class="view-toggle"
+				class="view-toggle align-center"
 				class:active={viewMode === 'list'}
 				onclick={() => viewMode = 'list'}
 				aria-label="List view"
 			>
-				☰
+				{@render listViewIcon()}
 			</button>
 		</div>
 	</div>
@@ -1075,5 +1076,10 @@
 			width: 100%;
 			min-width: auto;
 		}
+	}
+
+	.align-center {
+		display: flex;
+		align-items: center;
 	}
 </style>
