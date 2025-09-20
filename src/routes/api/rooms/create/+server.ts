@@ -25,7 +25,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
     // Create the room and add the room to the users' personal list
     const updates: Record<string, any> = {};
     updates[`rooms/${newRoomRef.key}`] = room;
-    updates[`users/${locals.user.uid}/rooms/${newRoomRef.key}`] = 'owner';
+    updates[`users/${user.uid}/rooms/${newRoomRef.key}`] = 'owner';
     
     await update(ref(db), updates);
 
