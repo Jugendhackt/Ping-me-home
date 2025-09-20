@@ -48,7 +48,7 @@ export async function validateRoomApiRequest(
         : Array.isArray(config.requiredUserRole)
             ? config.requiredUserRole
             : [config.requiredUserRole];
-    if (requiredRoles !== undefined && room.members[user.uid] !in requiredRoles) {
+    if (requiredRoles !== undefined && (!room.members[user.uid] || room.members[user.uid] !in requiredRoles)) {
         throw error(403, `This endpoint requires one of the roles: ${requiredRoles.join(',')}`);
     }
 
