@@ -50,7 +50,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
         return {
             room: room,
             roomId: params.roomId,
-            members: members,
+            members: members.sort((a, b) => a.role === 'owner' ? -1 : b.role === 'owner' ? 1 : 0),
             isOwner: room.members[user.uid] === 'owner',
         };
     } catch (err) {
