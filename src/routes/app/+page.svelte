@@ -85,7 +85,7 @@
 					</div>
 					<div class="rooms-text">
 						<span class="rooms-title">Manage Your Rooms</span>
-						<span class="rooms-description">Create, join, and manage your chat rooms</span>
+						<span class="rooms-description">Create, join, and manage rooms</span>
 					</div>
 				</div>
 				<div class="rooms-actions">
