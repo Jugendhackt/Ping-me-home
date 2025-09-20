@@ -1077,9 +1077,4 @@
 			min-width: auto;
 		}
 	}
-
-	.align-center {
-		display: flex;
-		align-items: center;
-	}
 </style>
