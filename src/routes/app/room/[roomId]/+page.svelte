@@ -126,6 +126,7 @@
         gap: 10px;
         border-bottom: 1px solid var(--border-color);
         border-radius: 8px;
+        transition: margin 150ms ease-out;
     }
 
     .member-item summary, .member-contents {
@@ -135,6 +136,10 @@
     .member-item summary:hover {
         background: var(--bg-hover);
         cursor: pointer;
+    }
+
+    details[open] summary {
+        margin-bottom: 10px;
     }
 
     .member-uid {
