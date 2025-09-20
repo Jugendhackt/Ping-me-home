@@ -122,7 +122,7 @@
                         </div>
                         <div class="align-center">
                             {#if isOwner && member.uid !== user.uid}
-                                <button class="icon-button" onclick={kick(member)}>
+                                <button class="icon-button" onclick={() => kick(member)}>
                                     {@render kickIcon()}
                                 </button>
                             {/if}
