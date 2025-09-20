@@ -19,13 +19,13 @@
 	});
 </script>
 
+{#if page.route.id === '/app'}
+<span class="app-title">Ping me Home!</span>
+{:else}
 <a href={backLink} class="app-title" style="text-decoration: none; cursor: pointer;">
-	{#if page.route.id === '/app'}
-		Ping me Home!
-	{:else}
-		<span class="back-arrow">←</span> Back to {backLabel}
-	{/if}
+    <span class="back-arrow">←</span> Back to {backLabel}
 </a>
+{/if}
 
 <style>
     .app-title {
