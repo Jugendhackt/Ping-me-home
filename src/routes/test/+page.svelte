@@ -1,4 +1,4 @@
-<script lang="ts">
+<!--<script lang="ts">
   import { onMount } from 'svelte';
 
   let addressInput = '';
@@ -208,4 +208,4 @@
 .address-section .success-message {
   margin-top: 0.5rem;
 }
-</style>
+</style> -->
