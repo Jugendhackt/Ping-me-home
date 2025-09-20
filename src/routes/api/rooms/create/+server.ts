@@ -1,3 +1,4 @@
+import { generateRandomId } from "$lib/server/apiUtils";
 import type { Room } from "$lib/types";
 import { error, json, type RequestHandler } from "@sveltejs/kit";
 import { getDatabase, push, ref, set } from "firebase/database";
@@ -13,8 +14,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
     }
     
     const db = getDatabase();
-    const roomListRef = ref(db, 'rooms');
-    const newRoomRef = push(roomListRef);
+    const newRoomRef = ref(db, 'rooms/' + generateRandomId());
     const room: Room = {
         name: name,
         members: {
