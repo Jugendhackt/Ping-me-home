@@ -2,13 +2,16 @@ import { validateRoomApiRequest, updateRoomMembership } from "$lib/server/apiUti
 import { error, json, type RequestHandler } from "@sveltejs/kit";
 
 export const POST: RequestHandler = async ({ params, locals, request }) => {
-    const { room, roomRef } = await validateRoomApiRequest(params.roomId, locals, {
+    const { room, roomRef, user } = await validateRoomApiRequest(params.roomId, locals, {
         requiredUserRole: 'owner',
     });
     
     const { userToKick } = await request.json();
     if (!userToKick) {
         throw error(400, 'Missing userToKick');
+    }
+    if (userToKick === user.uid) {
+        throw error(400, 'You can\'t kick yourself!');
     }
     
     if (!room.members[userToKick]) {

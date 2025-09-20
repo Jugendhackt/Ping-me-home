@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { copyIcon, crownIcon, doorIcon } from '$lib/components/Icons.svelte';
+	import { copyIcon, crownIcon, doorIcon, kickIcon } from '$lib/components/Icons.svelte';
     import ProfileAvatar from '$lib/components/ProfileAvatar.svelte';
     import type { PageData } from './$types';
     
@@ -38,6 +38,31 @@
             alert('An error occurred. Please try again.');
         });
     };
+
+    const kick = (member: {
+        uid: string,
+        displayName: string,
+    }) => {
+        if (confirm(`Do you really want to kick ${member.displayName}?`)) {
+            fetch(`/api/room/${roomId}/kick`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ userToKick: member.uid })
+            }).then(response => {
+                if (response.ok) {
+                    // Remove the kicked member from the UI
+                    members = members.filter(m => m.uid !== member.uid);
+                } else {
+                    alert('Failed to kick member. Please try again.');
+                }
+            }).catch(error => {
+                console.error('Error kicking member:', error);
+                alert('An error occurred. Please try again.');
+            });
+        }
+    };
 </script>
 
 <div class="room-info">
@@ -66,11 +91,19 @@
             {#each members as member}
                 <details class="member-item" name={member.uid}>
                     <summary>
-                        <ProfileAvatar displayName={member.displayName} profileURL={member.profileURL} />
-                        <span class="member-name align-center">{member.displayName}{#if member.role === 'owner'}
-                            {@render crownIcon('gold')}
-                        {/if}</span>
-                        <span class="member-status status-{member.status}">{member.status}</span>
+                        <div class="align-center">
+                            <ProfileAvatar displayName={member.displayName} profileURL={member.profileURL} />
+                            <span class="member-name align-center">{member.displayName}{#if member.role === 'owner'}
+                                {@render crownIcon('gold')}
+                            {/if}</span>
+                        </div>
+                        <div class="align-center">
+                            {#if isOwner}
+                                <button class="icon-button" onclick={kick(member)}>
+                                    {@render kickIcon()}
+                                </button>
+                            {/if}
+                        </div>
                     </summary>
                     <div class="member-contents">
                         (TODO: Show details about the user's status)
@@ -122,12 +155,16 @@
 
     .member-item summary {
         display: flex;
-        flex-direction: row;
         align-items: center;
-        gap: 10px;
+        justify-content: space-between;
+        flex-direction: row;
         border-bottom: 1px solid var(--border-color);
         border-radius: 8px;
         transition: margin 150ms ease-out;
+    }
+
+    .member-item summary div {
+        gap: 10px;
     }
 
     .member-item summary, .member-contents {

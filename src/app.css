@@ -289,3 +289,22 @@ button {
   display: flex;
   align-items: center;
 }
+
+/* Consistent icon button styling */
+.icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  padding: 4px 8px;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+  color: var(--text-primary);
+}
+
+.icon-button:hover, .icon-button:focus-visible {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-hover);
+}
