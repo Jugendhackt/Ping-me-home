@@ -62,12 +62,11 @@
 	<!-- Header -->
 	<header class="header">
 		<div class="header-content">
-			<h1 class="app-title">Ping me Home!</h1>
+			<a href="/app" class="app-title" style="text-decoration: none; cursor: pointer;">Ping me Home!</a>
 			
 			<!-- Navigation -->
 			<nav class="main-nav">
 				<a href="/app" class="nav-link">Dashboard</a>
-				<a href="/app/rooms" class="nav-link">Rooms</a>
 			</nav>
 			
 			<div class="header-actions">
