@@ -76,7 +76,7 @@
             }).then(response => {
                 if (response.ok) {
                     // Remove the kicked member from the UI
-                    members = members.filter(m => m.uid !== member.uid);
+                    members = members.filter((m: { uid: string }) => m.uid !== member.uid);
                 } else {
                     alert('Failed to kick member. Please try again.');
                 }
@@ -205,34 +205,6 @@
 
     details[open] summary {
         margin-bottom: 10px;
-    }
-
-    .member-uid {
-        font-family: monospace;
-        color: var(--text-muted);
-    }
-
-    .member-role {
-        padding: 0.25rem 0.5rem;
-        border-radius: 4px;
-        font-size: 0.875rem;
-        font-weight: bold;
-        text-transform: uppercase;
-    }
-
-    .role-owner {
-        background: var(--warning-color);
-        color: var(--text-primary);
-    }
-
-    .role-member {
-        background: var(--success-color);
-        color: var(--bg-primary);
-    }
-
-    .role-invited {
-        background: var(--accent-color);
-        color: var(--bg-primary);
     }
 
     h1 {
