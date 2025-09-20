@@ -53,40 +53,40 @@
         max-width: 800px;
         margin: 0 auto;
     }
-    
+
     .room-details, .members-section, .raw-data {
         margin-bottom: 2rem;
         padding: 1rem;
-        border: 1px solid #ddd;
+        border: 1px solid var(--border-color);
         border-radius: 8px;
-        background: #f9f9f9;
+        background: var(--bg-secondary);
     }
-    
+
     .info-item {
         margin-bottom: 0.5rem;
     }
-    
+
     .members-list {
         display: flex;
         flex-direction: column;
         gap: 0.5rem;
     }
-    
+
     .member-item {
         display: flex;
         justify-content: space-between;
         align-items: center;
         padding: 0.5rem;
-        background: white;
+        background: var(--bg-primary);
         border-radius: 4px;
-        border: 1px solid #eee;
+        border: 1px solid var(--border-color);
     }
-    
+
     .member-uid {
         font-family: monospace;
-        color: #666;
+        color: var(--text-muted);
     }
-    
+
     .member-role {
         padding: 0.25rem 0.5rem;
         border-radius: 4px;
@@ -94,38 +94,39 @@
         font-weight: bold;
         text-transform: uppercase;
     }
-    
+
     .role-owner {
-        background: #ffd700;
-        color: #333;
+        background: var(--warning-color);
+        color: var(--text-primary);
     }
-    
+
     .role-member {
-        background: #4caf50;
-        color: white;
+        background: var(--success-color);
+        color: var(--bg-primary);
     }
-    
+
     .role-invited {
-        background: #ff9800;
-        color: white;
+        background: var(--accent-color);
+        color: var(--bg-primary);
     }
-    
+
     pre {
-        background: #f0f0f0;
+        background: var(--bg-tertiary);
         padding: 1rem;
         border-radius: 4px;
         overflow-x: auto;
         font-family: 'Courier New', monospace;
         font-size: 0.875rem;
+        color: var(--text-primary);
     }
-    
+
     h1 {
-        color: #333;
+        color: var(--text-primary);
         margin-bottom: 1rem;
     }
-    
+
     h2 {
-        color: #555;
+        color: var(--text-secondary);
         margin-bottom: 1rem;
         font-size: 1.25rem;
     }
