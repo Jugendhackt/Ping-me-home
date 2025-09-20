@@ -3,9 +3,11 @@
 	import { auth } from '$lib/FirebaseConfig';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
+	import TogglePasswordIcon from '$lib/components/TogglePasswordIcon.svelte';
 	
 	let email = '';
 	let password = '';
+	let showPassword = $state(false);
 	let isLoading = false;
 	let error = '';
 	
@@ -110,14 +112,20 @@
 
 				<div class="form-group">
 					<label for="password">Password</label>
-					<input 
-						id="password"
-						type="password" 
-						bind:value={password}
-						placeholder="Enter your password"
-						required
-						disabled={isLoading}
-					/>
+					<div class="password-input-wrapper">
+						<input 
+							id="password"
+							type={showPassword ? 'text' : 'password'}
+							bind:value={password}
+							placeholder="Enter your password"
+							required
+							disabled={isLoading}
+						/>
+						<label class="toggle-password-label" for="togglePassword">
+							<TogglePasswordIcon {showPassword} />
+						</label>
+						<input type="checkbox" id="togglePassword" bind:checked={showPassword} style="display: none;" />
+					</div>
 				</div>
 
 				<button 
@@ -307,5 +315,26 @@
 		.title {
 			font-size: 1.3rem;
 		}
+	}
+
+	.password-input-wrapper {
+		position: relative;
+		display: flex;
+		align-items: center;
+	}
+	.password-input-wrapper input[type="password"],
+	.password-input-wrapper input[type="text"] {
+		flex: 1;
+		padding-right: 40px;
+	}
+	.toggle-password-label {
+		position: absolute;
+		right: 10px;
+		top: 50%;
+		transform: translateY(-50%);
+		display: flex;
+		align-items: center;
+		cursor: pointer;
+		user-select: none;
 	}
 </style>
