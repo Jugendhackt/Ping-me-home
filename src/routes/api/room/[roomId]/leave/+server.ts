@@ -1,6 +1,6 @@
 import type { Room } from "$lib/types";
 import { error, json, type RequestHandler } from "@sveltejs/kit";
-import { get, getDatabase, ref } from "firebase/database";
+import { get, getDatabase, ref, remove } from "firebase/database";
 
 export const POST: RequestHandler = async ({ params, locals }) => {
     if (!locals.user) {
@@ -21,6 +21,12 @@ export const POST: RequestHandler = async ({ params, locals }) => {
         throw error(403, 'You are not a member of this room!')
     }
 
-    delete room.members[locals.user.uid];
+    if (room.members[locals.user.uid] === 'owner') {
+        remove(groupRef);
+        // TODO handle the rest of the deletion logic
+    } else {
+        delete room.members[locals.user.uid];
+    }
+
     return json({ success: true });
 };
