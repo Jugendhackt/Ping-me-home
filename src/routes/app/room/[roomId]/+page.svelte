@@ -50,9 +50,9 @@
         <div class="info-item">
             <strong>URL Joining Allowed:</strong> {room.allowUrlJoining ? 'Yes' : 'No'}
             {#if room.allowUrlJoining}
-                    <a aria-label="Copy join URL" class="copy-join-url-button align-center" onclick={copyJoinUrl}>
-                        {@render copyIcon()}
-                    </a>
+                <button type="button" aria-label="Copy join URL" class="copy-join-url-button align-center" onclick={copyJoinUrl} style="background-color: transparent; border: none;">
+                    {@render copyIcon()}
+                </button>
             {/if}
         </div>
         <div class="info-item">
