@@ -3,6 +3,7 @@
 	import { onMount } from 'svelte';
 	import ProfileAvatar from '$lib/components/ProfileAvatar.svelte';
 	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
 	
 	let { data, children }: { data: LayoutData, children: any } = $props();
 	let theme = $state('light');
@@ -62,7 +63,13 @@
 	<!-- Header -->
 	<header class="header">
 		<div class="header-content">
-			<a href="/app" class="app-title" style="text-decoration: none; cursor: pointer;">Ping me Home!</a>
+			<a href="/app" class="app-title" style="text-decoration: none; cursor: pointer;">
+				{#if page.route.id === '/app'}
+					Ping me Home!
+				{:else}
+					← Back to Dashboard
+				{/if}
+			</a>
 			
 			<div class="header-actions">
 				<button class="theme-toggle" onclick={toggleTheme} aria-label="Toggle theme">
