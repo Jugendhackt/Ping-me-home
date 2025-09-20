@@ -1,39 +1,101 @@
 <script lang="ts">
 	import type { PageData } from './$types';
+	import ProfileAvatar from '$lib/components/ProfileAvatar.svelte';
+	import { goto } from '$app/navigation';
 	
 	let { data }: { data: PageData } = $props();
+	
+	function goToProfile() {
+		goto('/app/profile');
+	}
 </script>
 
 <svelte:head>
-	<title>Ping me Home!</title>
+	<title>Dashboard - JHCGN</title>
 	<meta name="description" content="PMH Application">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 </svelte:head>
 
 <div class="app-page">
-	<div class="welcome-section">
-		<div class="welcome-card">
-			<div class="welcome-header">
-				<h1 class="welcome-title">Hello World! 👋</h1>
-				<p class="welcome-subtitle">Welcome to Ping me Home!</p>
+	<div class="dashboard-header">
+		<div class="welcome-content">
+			<ProfileAvatar 
+				displayName={data.user.displayName || data.user.email?.split('@')[0] || 'User'}
+				profileURL={data.user.profileURL || ''}
+				size="large"
+			/>
+			<div class="welcome-text">
+				<h1>Welcome back, {data.user.displayName || data.user.email?.split('@')[0] || 'User'}! 👋</h1>
+				<p>What's poppin today?</p>
 			</div>
-			
-			<div class="user-card">
-				<h2 class="section-title">User Information</h2>
-				<div class="user-details">
-					<div class="detail-item">
-						<span class="label">Email:</span>
-						<span class="value">{data.user.email}</span>
-					</div>
-					<div class="detail-item">
-						<span class="label">Role:</span>
-						<span class="value role-badge">{data.user.role}</span>
-					</div>
-					<div class="detail-item">
-						<span class="label">User ID:</span>
-						<span class="value user-id">{data.user.uid}</span>
+		</div>
+		<button class="edit-profile-btn" onclick={goToProfile}>
+			⚙️ Edit Profile
+		</button>
+	</div>
+	
+	<div class="dashboard-grid">
+		<div class="dashboard-card profile-card">
+			<div class="card-header">
+				<h2>👤 Profile Information</h2>
+				<button class="card-action" onclick={goToProfile}>Edit</button>
+			</div>
+			<div class="profile-info">
+				<div class="profile-avatar-section">
+					<ProfileAvatar 
+						displayName={data.user.displayName || data.user.email?.split('@')[0] || 'User'}
+						profileURL={data.user.profileURL || ''}
+						size="medium"
+					/>
+					<div class="profile-details">
+						<h3>{data.user.displayName || 'No display name set'}</h3>
+						<p>{data.user.email}</p>
 					</div>
 				</div>
+				<div class="info-grid">
+					<div class="info-item">
+						<span class="info-label">User ID</span>
+						<span class="info-value">{data.user.uid}</span>
+					</div>
+					<div class="info-item">
+						<span class="info-label">Account Role</span>
+						<span class="info-value role-badge">{data.user.role || 'user'}</span>
+					</div>
+					{#if data.user.createdAt}
+					<div class="info-item">
+						<span class="info-label">Member Since</span>
+						<span class="info-value">{new Date(data.user.createdAt).toLocaleDateString()}</span>
+					</div>
+					{/if}
+				</div>
+			</div>
+		</div>
+		
+		
+		
+		<div class="dashboard-card">
+			<div class="card-header">
+				<h2>📊 Activity</h2>
+			</div>
+			<div class="activity-content">
+				<div class="activity-item">
+					<div class="activity-icon">🆕</div>
+					<div class="activity-text">
+						<span class="activity-title">Account Created</span>
+						<span class="activity-time">
+							{data.user.createdAt ? new Date(data.user.createdAt).toLocaleDateString() : 'Recently'}
+						</span>
+					</div>
+				</div>
+				{#if data.user.updatedAt && data.user.updatedAt !== data.user.createdAt}
+				<div class="activity-item">
+					<div class="activity-icon">✏️</div>
+					<div class="activity-text">
+						<span class="activity-title">Profile Updated</span>
+						<span class="activity-time">{new Date(data.user.updatedAt).toLocaleDateString()}</span>
+					</div>
+				</div>
+				{/if}
 			</div>
 		</div>
 	</div>
@@ -44,209 +106,289 @@
 		width: 100%;
 	}
 	
-	.welcome-section {
-		display: flex;
-		justify-content: center;
-		width: 100%;
-	}
-	
-	.welcome-card {
-		background: var(--bg-secondary);
-		border: 1px solid var(--border-color);
-		border-radius: 12px;
-		padding: 32px;
-		max-width: 800px;
-		width: 100%;
-		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-	}
-	
-	.welcome-header {
-		text-align: center;
-		margin-bottom: 32px;
-	}
-	
-	.welcome-title {
-		font-size: 2.5rem;
-		font-weight: 700;
-		margin: 0 0 8px 0;
-		color: var(--text-primary);
-	}
-	
-	.welcome-subtitle {
-		font-size: 1.1rem;
-		color: var(--text-secondary);
-		margin: 0;
-	}
-	
-	.user-card {
-		background: var(--bg-tertiary);
-		border: 1px solid var(--border-color);
-		border-radius: 8px;
-		padding: 24px;
-		margin-bottom: 32px;
-	}
-	
-	.section-title {
-		font-size: 1.25rem;
-		font-weight: 600;
-		margin: 0 0 16px 0;
-		color: var(--text-primary);
-	}
-	
-	.user-details {
-		display: flex;
-		flex-direction: column;
-		gap: 12px;
-	}
-	
-	.detail-item {
+	.dashboard-header {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		padding: 8px 0;
-		border-bottom: 1px solid var(--border-color);
+		margin-bottom: 2rem;
+		padding: 1.5rem;
+		background: var(--bg-secondary);
+		border: 1px solid var(--border-color);
+		border-radius: 12px;
 	}
 	
-	.detail-item:last-child {
-		border-bottom: none;
+	.welcome-content {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
 	}
 	
-	.label {
-		font-weight: 500;
+	.welcome-text h1 {
+		margin: 0 0 0.5rem 0;
+		color: var(--text-primary);
+		font-size: 1.5rem;
+		font-weight: 600;
+	}
+	
+	.welcome-text p {
+		margin: 0;
 		color: var(--text-secondary);
 		font-size: 0.9rem;
 	}
 	
-	.value {
-		font-weight: 600;
+	.edit-profile-btn {
+		background: var(--accent-color);
+		color: white;
+		border: none;
+		padding: 0.5rem 1rem;
+		border-radius: 6px;
+		cursor: pointer;
+		font-size: 0.9rem;
+		font-weight: 500;
+		transition: background-color 0.2s ease;
+	}
+	
+	.edit-profile-btn:hover {
+		background: var(--accent-hover);
+	}
+	
+	.dashboard-grid {
+		display: grid;
+		gap: 1.5rem;
+		grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+	}
+	
+	.dashboard-card {
+		background: var(--bg-secondary);
+		border: 1px solid var(--border-color);
+		border-radius: 12px;
+		padding: 1.5rem;
+		transition: box-shadow 0.2s ease;
+	}
+	
+	.dashboard-card:hover {
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+	}
+	
+	.card-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 1rem;
+	}
+	
+	.card-header h2 {
+		margin: 0;
 		color: var(--text-primary);
-		text-align: right;
+		font-size: 1.1rem;
+		font-weight: 600;
+	}
+	
+	.card-action {
+		background: var(--bg-tertiary);
+		color: var(--text-secondary);
+		border: 1px solid var(--border-color);
+		padding: 0.25rem 0.75rem;
+		border-radius: 4px;
+		cursor: pointer;
+		font-size: 0.8rem;
+		transition: all 0.2s ease;
+	}
+	
+	.card-action:hover {
+		background: var(--bg-hover);
+		color: var(--text-primary);
+	}
+	
+	.profile-card {
+		grid-column: span 1;
+	}
+	
+	.profile-info {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+	}
+	
+	.profile-avatar-section {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+	}
+	
+	.profile-details h3 {
+		margin: 0 0 0.25rem 0;
+		color: var(--text-primary);
+		font-size: 1rem;
+		font-weight: 600;
+	}
+	
+	.profile-details p {
+		margin: 0;
+		color: var(--text-secondary);
+		font-size: 0.85rem;
+	}
+	
+	.info-grid {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+	
+	.info-item {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 0.5rem 0;
+		border-bottom: 1px solid var(--border-color);
+	}
+	
+	.info-item:last-child {
+		border-bottom: none;
+	}
+	
+	.info-label {
+		color: var(--text-secondary);
+		font-size: 0.85rem;
+		font-weight: 500;
+	}
+	
+	.info-value {
+		color: var(--text-primary);
+		font-size: 0.85rem;
+		font-weight: 500;
 	}
 	
 	.role-badge {
 		background: var(--accent-color);
 		color: white;
-		padding: 4px 12px;
-		border-radius: 16px;
-		font-size: 0.8rem;
+		padding: 0.2rem 0.5rem;
+		border-radius: 12px;
+		font-size: 0.7rem;
+		font-weight: 600;
 		text-transform: uppercase;
 		letter-spacing: 0.5px;
 	}
 	
-	.status-badge {
-		padding: 4px 12px;
-		border-radius: 16px;
-		font-size: 0.8rem;
-		font-weight: 600;
+	.quick-actions {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
 	}
 	
-	.verified {
-		background: #10b981;
-		color: white;
-	}
-	
-	.unverified {
-		background: #f59e0b;
-		color: white;
-	}
-	
-	.user-id {
-		font-family: monospace;
-		font-size: 0.8rem;
-		background: var(--bg-primary);
-		padding: 4px 8px;
-		border-radius: 4px;
-		max-width: 200px;
-		overflow: hidden;
-		text-overflow: ellipsis;
-	}
-	
-	.features-section {
-		margin-top: 32px;
-	}
-	
-	.feature-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-		gap: 16px;
-		margin-top: 16px;
-	}
-	
-	.feature-card {
+	.action-btn {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
 		background: var(--bg-tertiary);
 		border: 1px solid var(--border-color);
+		padding: 1rem;
 		border-radius: 8px;
-		padding: 20px;
-		text-align: center;
-		transition: transform 0.2s ease;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		text-align: left;
 	}
 	
-	.feature-card:hover {
-		transform: translateY(-2px);
+	.action-btn:hover {
+		background: var(--bg-hover);
+		border-color: var(--accent-color);
 	}
 	
-	.feature-icon {
-		font-size: 2rem;
-		margin-bottom: 12px;
+	.action-btn.primary {
+		background: rgba(52, 152, 219, 0.1);
+		border-color: var(--accent-color);
 	}
 	
-	.feature-title {
-		font-size: 1rem;
-		font-weight: 600;
-		margin: 0 0 8px 0;
+	.action-icon {
+		font-size: 1.5rem;
+		flex-shrink: 0;
+	}
+	
+	.action-text {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+	}
+	
+	.action-title {
 		color: var(--text-primary);
+		font-weight: 600;
+		font-size: 0.9rem;
 	}
 	
-	.feature-description {
-		font-size: 0.85rem;
+	.action-desc {
 		color: var(--text-secondary);
-		margin: 0;
-		line-height: 1.4;
+		font-size: 0.8rem;
+	}
+	
+	.activity-content {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+	}
+	
+	.activity-item {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		padding: 0.75rem;
+		background: var(--bg-tertiary);
+		border-radius: 8px;
+	}
+	
+	.activity-icon {
+		font-size: 1.25rem;
+		flex-shrink: 0;
+	}
+	
+	.activity-text {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+	}
+	
+	.activity-title {
+		color: var(--text-primary);
+		font-weight: 500;
+		font-size: 0.85rem;
+	}
+	
+	.activity-time {
+		color: var(--text-secondary);
+		font-size: 0.75rem;
 	}
 	
 	@media (max-width: 768px) {
-		.welcome-card {
-			padding: 24px;
-		}
-		
-		.welcome-title {
-			font-size: 2rem;
-		}
-		
-		.user-card {
-			padding: 20px;
-		}
-		
-		.detail-item {
+		.dashboard-header {
 			flex-direction: column;
-			align-items: flex-start;
-			gap: 4px;
+			gap: 1rem;
+			text-align: center;
 		}
 		
-		.value {
-			text-align: left;
+		.welcome-content {
+			flex-direction: column;
+			text-align: center;
 		}
 		
-		.user-id {
-			max-width: 100%;
-		}
-		
-		.feature-grid {
+		.dashboard-grid {
 			grid-template-columns: 1fr;
 		}
-	}
-	
-	@media (max-width: 480px) {
-		.welcome-card {
-			padding: 20px;
+		
+		.profile-avatar-section {
+			flex-direction: column;
+			text-align: center;
 		}
 		
-		.welcome-title {
-			font-size: 1.75rem;
+		.info-item {
+			flex-direction: column;
+			align-items: flex-start;
+			gap: 0.25rem;
 		}
 		
-		.feature-card {
-			padding: 16px;
+		.action-btn {
+			flex-direction: column;
+			text-align: center;
+			gap: 0.5rem;
 		}
 	}
 </style>

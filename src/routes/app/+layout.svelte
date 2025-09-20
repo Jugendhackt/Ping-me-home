@@ -1,21 +1,44 @@
 <script lang="ts">
 	import type { LayoutData } from './$types';
 	import { onMount } from 'svelte';
+	import ProfileAvatar from '$lib/components/ProfileAvatar.svelte';
+	import { goto } from '$app/navigation';
 	
 	let { data, children }: { data: LayoutData, children: any } = $props();
 	let theme = $state('light');
+	let showUserMenu = $state(false);
 	
 	onMount(() => {
 		// Load theme from localStorage or default to light
 		const savedTheme = localStorage.getItem('theme') || 'light';
 		theme = savedTheme;
 		document.documentElement.setAttribute('data-theme', theme);
+		
+		// Close user menu when clicking outside
+		const handleClickOutside = (event: MouseEvent) => {
+			const target = event.target as Element;
+			if (!target.closest('.user-menu-container')) {
+				showUserMenu = false;
+			}
+		};
+		
+		document.addEventListener('click', handleClickOutside);
+		return () => document.removeEventListener('click', handleClickOutside);
 	});
 	
 	function toggleTheme() {
 		theme = theme === 'light' ? 'dark' : 'light';
 		localStorage.setItem('theme', theme);
 		document.documentElement.setAttribute('data-theme', theme);
+	}
+	
+	function toggleUserMenu() {
+		showUserMenu = !showUserMenu;
+	}
+	
+	function goToProfile() {
+		showUserMenu = false;
+		goto('/app/profile');
 	}
 	
 	async function handleLogout() {
@@ -39,21 +62,47 @@
 	<!-- Header -->
 	<header class="header">
 		<div class="header-content">
-			<h1 class="app-title">JHCGN</h1>
+			<h1 class="app-title">Ping me Home!</h1>
 			
 			<div class="header-actions">
 				<button class="theme-toggle" onclick={toggleTheme} aria-label="Toggle theme">
 					{theme === 'light' ? '🌙' : '☀️'}
 				</button>
 				
-				<div class="user-menu">
-					<div class="user-info">
-						<span class="user-email">{data.user.email}</span>
-						<span class="user-role">{data.user.role}</span>
-					</div>
-					<button class="logout-btn" onclick={handleLogout}>
-						Logout
+				<div class="user-menu-container">
+					<button class="profile-btn" onclick={toggleUserMenu} aria-label="User menu">
+						<ProfileAvatar 
+							displayName={data.user.displayName || data.user.email?.split('@')[0] || 'User'} 
+							profileURL={data.user.profileURL || ''}
+							size="small"
+						/>
+						<span class="user-name">{data.user.displayName || data.user.email?.split('@')[0] || 'User'}</span>
 					</button>
+					
+					{#if showUserMenu}
+						<div class="user-dropdown">
+							<div class="user-info">
+								<div class="user-details">
+									<ProfileAvatar 
+										displayName={data.user.displayName || data.user.email?.split('@')[0] || 'User'} 
+										profileURL={data.user.profileURL || ''}
+										size="medium"
+									/>
+									<div class="user-text">
+										<span class="user-display-name">{data.user.displayName || 'User'}</span>
+										<span class="user-email">{data.user.email}</span>
+									</div>
+								</div>
+							</div>
+							<hr class="menu-divider" />
+							<button class="menu-item" onclick={goToProfile}>
+								⚙️ Profile Settings
+							</button>
+							<button class="menu-item logout-item" onclick={handleLogout}>
+								🚪 Logout
+							</button>
+						</div>
+					{/if}
 				</div>
 			</div>
 		</div>
@@ -117,45 +166,103 @@
 		background: var(--bg-hover);
 	}
 	
-	.user-menu {
+	.user-menu-container {
+		position: relative;
+	}
+	
+	.profile-btn {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		background: var(--bg-tertiary);
+		border: 1px solid var(--border-color);
+		border-radius: 8px;
+		padding: 6px 12px;
+		cursor: pointer;
+		transition: all 0.2s ease;
+	}
+	
+	.profile-btn:hover {
+		background: var(--bg-hover);
+	}
+	
+	.user-name {
+		color: var(--text-primary);
+		font-size: 0.9rem;
+		font-weight: 500;
+		white-space: nowrap;
+	}
+	
+	.user-dropdown {
+		position: absolute;
+		top: calc(100% + 8px);
+		right: 0;
+		background: var(--bg-secondary);
+		border: 1px solid var(--border-color);
+		border-radius: 8px;
+		box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+		min-width: 240px;
+		overflow: hidden;
+		z-index: 1000;
+	}
+	
+	.user-info {
+		padding: 16px;
+	}
+	
+	.user-details {
 		display: flex;
 		align-items: center;
 		gap: 12px;
 	}
 	
-	.user-info {
+	.user-text {
 		display: flex;
 		flex-direction: column;
-		align-items: flex-end;
-		font-size: 0.85rem;
+		gap: 2px;
+	}
+	
+	.user-display-name {
+		color: var(--text-primary);
+		font-weight: 600;
+		font-size: 0.9rem;
 	}
 	
 	.user-email {
-		color: var(--text-primary);
-		font-weight: 500;
-	}
-	
-	.user-role {
 		color: var(--text-secondary);
-		font-size: 0.75rem;
-		text-transform: uppercase;
-		letter-spacing: 0.5px;
+		font-size: 0.8rem;
 	}
 	
-	.logout-btn {
-		background: var(--accent-color);
-		color: white;
+	.menu-divider {
 		border: none;
-		padding: 8px 16px;
-		border-radius: 6px;
-		cursor: pointer;
-		font-size: 0.85rem;
-		font-weight: 500;
-		transition: background-color 0.2s ease;
+		border-top: 1px solid var(--border-color);
+		margin: 0;
 	}
 	
-	.logout-btn:hover {
-		background: var(--accent-hover);
+	.menu-item {
+		display: flex;
+		align-items: center;
+		width: 100%;
+		background: none;
+		border: none;
+		padding: 12px 16px;
+		cursor: pointer;
+		font-size: 0.9rem;
+		color: var(--text-primary);
+		transition: background-color 0.2s ease;
+		text-align: left;
+	}
+	
+	.menu-item:hover {
+		background: var(--bg-hover);
+	}
+	
+	.logout-item {
+		color: var(--accent-color);
+	}
+	
+	.logout-item:hover {
+		background: rgba(231, 76, 60, 0.1);
 	}
 	
 	.main-content {
@@ -174,7 +281,7 @@
 			font-size: 1.3rem;
 		}
 		
-		.user-info {
+		.user-name {
 			display: none;
 		}
 		
@@ -185,17 +292,17 @@
 		.header-actions {
 			gap: 12px;
 		}
+		
+		.user-dropdown {
+			right: -8px;
+			min-width: 200px;
+		}
 	}
 	
 	@media (max-width: 480px) {
 		.theme-toggle {
 			padding: 6px 10px;
 			font-size: 1rem;
-		}
-		
-		.logout-btn {
-			padding: 6px 12px;
-			font-size: 0.8rem;
 		}
 	}
 </style>
