@@ -111,7 +111,7 @@
 	}
 
 	function handleBackdropKeydown(e: KeyboardEvent) {
-		if (e.key === 'Enter' || e.key === ' ') {
+		if (e.key === 'Enter') {
 			e.preventDefault();
 			closeCreateModal();
 		}
