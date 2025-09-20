@@ -3,7 +3,7 @@
 	import { onMount } from 'svelte';
 	import ProfileAvatar from '$lib/components/ProfileAvatar.svelte';
 	import { goto } from '$app/navigation';
-	import { page } from '$app/state';
+	import NavTitle from '$lib/components/NavTitle.svelte';
 	
 	let { data, children }: { data: LayoutData, children: any } = $props();
 	let theme = $state('light');
@@ -63,13 +63,7 @@
 	<!-- Header -->
 	<header class="header">
 		<div class="header-content">
-			<a href="/app" class="app-title" style="text-decoration: none; cursor: pointer;">
-				{#if page.route.id === '/app'}
-					Ping me Home!
-				{:else}
-					<span class="back-arrow">←</span> Back to Dashboard
-				{/if}
-			</a>
+			<NavTitle />
 			
 			<div class="header-actions">
 				<button class="theme-toggle" onclick={toggleTheme} aria-label="Toggle theme">
@@ -144,13 +138,6 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-	}
-	
-	.app-title {
-		font-size: 1.5rem;
-		font-weight: 700;
-		margin: 0;
-		color: var(--text-primary);
 	}
 	
 	.header-actions {
@@ -284,10 +271,6 @@
 			padding: 12px 16px;
 		}
 		
-		.app-title {
-			font-size: 1.3rem;
-		}
-		
 		.user-name {
 			display: none;
 		}
@@ -311,15 +294,5 @@
 			padding: 6px 10px;
 			font-size: 1rem;
 		}
-	}
-
-	.back-arrow {
-		position: relative;
-		right: 0px;
-		transition: right 0.1s ease-in-out;
-	}
-
-	a:hover .back-arrow {
-		right: 7px;
 	}
 </style>
