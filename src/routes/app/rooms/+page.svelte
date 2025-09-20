@@ -135,7 +135,7 @@
 	}
 
 	function sortRoomsByRole(rooms: typeof data.rooms) {
-		const rolePriority = { 'owner': 3, 'member': 2, 'invited': 1 } as const;
+		const rolePriority: { [role: string]: number } = { 'owner': 3, 'member': 2, 'invited': 1 } as const;
 		return [...rooms].sort((a, b) => {
 			const priorityDiff = rolePriority[b.role] - rolePriority[a.role];
 			if (priorityDiff !== 0) return priorityDiff;

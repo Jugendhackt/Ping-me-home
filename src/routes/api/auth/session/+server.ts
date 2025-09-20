@@ -1,8 +1,8 @@
 import { adminAuth } from '$lib/server/firebaseAdmin';
-import { json } from '@sveltejs/kit';
+import { json, type RequestHandler } from '@sveltejs/kit';
 import { dev } from '$app/environment';
 
-export async function POST({ request, cookies }) {
+export const POST: RequestHandler = async ({ request, cookies }) => {
 	try {
 		const { idToken } = await request.json();
 		

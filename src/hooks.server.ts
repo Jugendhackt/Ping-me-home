@@ -15,7 +15,8 @@ export const handle: Handle = async ({ event, resolve }) => {
 				uid: decodedClaims.uid,
 				email: decodedClaims.email,
 				role: decodedClaims.role || 'user',
-				emailVerified: decodedClaims.email_verified || false
+				emailVerified: decodedClaims.email_verified || false,
+				pendingInvites: decodedClaims.pendingInvites || [],
 			};
 			
 			console.log('✅ Session verified for user:', decodedClaims.email);
