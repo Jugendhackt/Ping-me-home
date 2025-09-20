@@ -18,7 +18,7 @@ const requiredEnvVars = {
   FIREBASE_DATABASE_URL
 };
 
-const missingVars = Object.entries(requiredEnvVars).filter(([key, value]) => !value).map(([key]) => key);
+const missingVars = Object.entries(requiredEnvVars).filter(([, value]) => !value).map(([key]) => key);
 let adminAuth: any = {} as any;
 let adminDb: any = {} as any;
 

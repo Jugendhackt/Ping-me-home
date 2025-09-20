@@ -1,5 +1,5 @@
+import { adminDb } from '$lib/server/firebaseAdmin';
 import { redirect } from '@sveltejs/kit';
-import { adminAuth, adminDb } from '$lib/server/firebaseAdmin';
 import type { LayoutServerLoad } from './$types';
 
 export const load: LayoutServerLoad = async ({ locals }) => {

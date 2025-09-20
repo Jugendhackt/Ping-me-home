@@ -1,7 +1,6 @@
 <!-- Beispiel-Komponente für die Nutzung des userRooms Store -->
 <script lang="ts">
     import { userRooms } from '$lib/server/stores/userRooms';
-    import type { UserRoom } from '$lib/server/stores/userRooms';
 
     // Der Store ist automatisch reaktiv und aktualisiert sich in Echtzeit
     $: ({ rooms, loading, error } = $userRooms);

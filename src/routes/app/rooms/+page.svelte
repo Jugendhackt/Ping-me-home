@@ -73,7 +73,7 @@
 				throw new Error(error.message || 'Failed to create room');
 			}
 
-			const result = await response.json();
+			await response.json();
 			
 			// Reset form and close modal
 			newRoomName = '';

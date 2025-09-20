@@ -8,10 +8,6 @@
 	function goToProfile() {
 		goto('/app/profile');
 	}
-
-	function goToRooms() {
-		goto('/app/rooms');
-	}
 </script>
 
 <svelte:head>
