@@ -5,6 +5,7 @@
 	let email = '';
 	let password = '';
 	let confirmPassword = '';
+	let displayName = '';
 	let isLoading = false;
 	let error = '';
 
@@ -12,7 +13,7 @@
 		event.preventDefault();
 		error = '';
 
-		if (!email || !password || !confirmPassword) {
+		if (!email || !password || !confirmPassword || !displayName) {
 			error = 'Please fill in all fields';
 			return;
 		}
@@ -27,6 +28,11 @@
 			return;
 		}
 
+		if (displayName.trim().length < 2) {
+			error = 'Display name must be at least 2 characters';
+			return;
+		}
+
 		isLoading = true;
 
 		try {
@@ -35,7 +41,7 @@
 				headers: {
 					'Content-Type': 'application/json'
 				},
-				body: JSON.stringify({ email, password })
+				body: JSON.stringify({ email, password, displayName: displayName.trim() })
 			});
 
 			const result = await response.json();
@@ -113,6 +119,18 @@
 					type="email"
 					bind:value={email}
 					placeholder="Enter your email"
+					required
+					disabled={isLoading}
+				/>
+			</div>
+
+			<div class="form-group">
+				<label for="displayName">Display Name</label>
+				<input
+					id="displayName"
+					type="text"
+					bind:value={displayName}
+					placeholder="Enter your display name"
 					required
 					disabled={isLoading}
 				/>
