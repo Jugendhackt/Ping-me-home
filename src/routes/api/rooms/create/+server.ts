@@ -9,7 +9,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
         throw error(401, 'Please log in to use this endpoint!')
     }
     
-    const { name } = await request.json();
+    const { name, allowUrlJoining } = await request.json();
     if (!name) {
         throw error(400, 'Missing name');
     }
@@ -20,6 +20,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
         members: {
             [locals.user.uid]: 'owner',
         },
+        allowUrlJoining: allowUrlJoining ?? true,
     };
     set(newRoomRef, room);
     return json({ success: true, key: newRoomRef.key });

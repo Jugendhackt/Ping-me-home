@@ -11,4 +11,5 @@ export type RoomRole = 'invited'|'member'|'owner';
 export interface Room {
   name: string;
   members: { [uid: string]: RoomRole };
+  allowUrlJoining: boolean;
 }
