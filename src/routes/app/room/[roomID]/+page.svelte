@@ -6,6 +6,11 @@
     $: room = data.room;
     $: roomId = data.roomId;
     $: members = data.members;
+
+    const copyJoinUrl = () => {
+        const joinUrl = `${window.location.origin}/join/${roomId}`;
+        navigator.clipboard.writeText(joinUrl);
+    };
 </script>
 
 <div class="room-info">
@@ -18,6 +23,11 @@
         </div>
         <div class="info-item">
             <strong>URL Joining Allowed:</strong> {room.allowUrlJoining ? 'Yes' : 'No'}
+            {#if room.allowUrlJoining}
+                <a aria-label="Copy join URL" class="copy-join-url-button" onclick={copyJoinUrl}>
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M120-220v-80h80v80h-80Zm0-140v-80h80v80h-80Zm0-140v-80h80v80h-80ZM260-80v-80h80v80h-80Zm100-160q-33 0-56.5-23.5T280-320v-480q0-33 23.5-56.5T360-880h360q33 0 56.5 23.5T800-800v480q0 33-23.5 56.5T720-240H360Zm0-80h360v-480H360v480Zm40 240v-80h80v80h-80Zm-200 0q-33 0-56.5-23.5T120-160h80v80Zm340 0v-80h80q0 33-23.5 56.5T540-80ZM120-640q0-33 23.5-56.5T200-720v80h-80Zm420 80Z"/></svg>
+                </a>
+            {/if}
         </div>
         <div class="info-item">
             <strong>Total Members:</strong> {members.length}
@@ -124,5 +134,11 @@
         color: var(--text-secondary);
         margin-bottom: 1rem;
         font-size: 1.25rem;
+    }
+
+    .copy-join-url-button {
+        cursor: pointer;
+        vertical-align: middle;
+        padding: 0;
     }
 </style>
