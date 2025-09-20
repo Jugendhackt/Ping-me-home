@@ -5,11 +5,11 @@
 	import { onMount } from 'svelte';
 	import TogglePasswordIcon from '$lib/components/TogglePasswordIcon.svelte';
 	
-	let email = '';
-	let password = '';
+	let email = $state('');
+	let password = $state('');
 	let showPassword = $state(false);
-	let isLoading = false;
-	let error = '';
+	let isLoading = $state(false);
+	let error = $state('');
 	
 	onMount(() => {
 		// Redirect when logged in already
@@ -122,7 +122,7 @@
 							disabled={isLoading}
 						/>
 						<label class="toggle-password-label" for="togglePassword">
-							<TogglePasswordIcon {showPassword} />
+							<TogglePasswordIcon showPassword={showPassword} />
 						</label>
 						<input type="checkbox" id="togglePassword" bind:checked={showPassword} style="display: none;" />
 					</div>

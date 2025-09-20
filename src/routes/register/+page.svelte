@@ -3,14 +3,14 @@
 	import TogglePasswordIcon from '$lib/components/TogglePasswordIcon.svelte';
 	import { onMount } from 'svelte';
 
-	let email = '';
-	let password = '';
+	let email = $state('');
+	let password = $state('');
 	let showPassword = $state(false);
 	let showConfirmPassword = $state(false);
-	let confirmPassword = '';
-	let displayName = '';
-	let isLoading = false;
-	let error = '';
+	let confirmPassword = $state('');
+	let displayName = $state('');
+	let isLoading = $state(false);
+	let error = $state('');
 
 	async function handleRegister(event: SubmitEvent) {
 		event.preventDefault();
@@ -151,7 +151,7 @@
 						disabled={isLoading}
 					/>
 					<label class="toggle-password-label" for="togglePassword">
-						<TogglePasswordIcon {showPassword} />
+						<TogglePasswordIcon showPassword={showPassword} />
 					</label>
 					<input type="checkbox" id="togglePassword" bind:checked={showPassword} style="display: none;" />
 				</div>
@@ -169,7 +169,7 @@
 						disabled={isLoading}
 					/>
 					<label class="toggle-password-label" for="toggleConfirmPassword">
-						<TogglePasswordIcon {showConfirmPassword} />
+						<TogglePasswordIcon showPassword={showConfirmPassword} />
 					</label>
 					<input type="checkbox" id="toggleConfirmPassword" bind:checked={showConfirmPassword} style="display: none;" />
 				</div>
