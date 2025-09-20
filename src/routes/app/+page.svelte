@@ -8,6 +8,10 @@
 	function goToProfile() {
 		goto('/app/profile');
 	}
+
+	function goToRooms() {
+		goto('/app/rooms');
+	}
 </script>
 
 <svelte:head>
@@ -67,6 +71,27 @@
 							<span class="info-value">{new Date(data.user.createdAt).toLocaleDateString()}</span>
 						</div>
 					{/if}
+				</div>
+			</div>
+		</div>
+
+		<div class="dashboard-card">
+			<div class="card-header">
+				<h2>🏠 Rooms</h2>
+				<button class="card-action" onclick={() => goto('/app/rooms')}>View All</button>
+			</div>
+			<div class="rooms-content">
+				<div class="rooms-summary">
+					<div class="rooms-icon">🏠</div>
+					<div class="rooms-text">
+						<span class="rooms-title">Manage Your Rooms</span>
+						<span class="rooms-description">Create, join, and manage your chat rooms</span>
+					</div>
+				</div>
+				<div class="rooms-actions">
+					<button class="primary-btn" onclick={() => goto('/app/rooms')}>
+						View Rooms
+					</button>
 				</div>
 			</div>
 		</div>
@@ -306,6 +331,65 @@
 	.activity-time {
 		color: var(--text-secondary);
 		font-size: 0.75rem;
+	}
+
+	.rooms-content {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+	}
+
+	.rooms-summary {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		padding: 0.75rem;
+		background: var(--bg-tertiary);
+		border-radius: 8px;
+	}
+
+	.rooms-icon {
+		font-size: 1.25rem;
+		flex-shrink: 0;
+	}
+
+	.rooms-text {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+	}
+
+	.rooms-title {
+		color: var(--text-primary);
+		font-weight: 500;
+		font-size: 0.85rem;
+	}
+
+	.rooms-description {
+		color: var(--text-secondary);
+		font-size: 0.75rem;
+	}
+
+	.rooms-actions {
+		display: flex;
+		gap: 0.5rem;
+	}
+
+	.primary-btn {
+		background: var(--accent-color);
+		color: white;
+		border: none;
+		padding: 0.5rem 1rem;
+		border-radius: 6px;
+		cursor: pointer;
+		font-size: 0.85rem;
+		font-weight: 500;
+		transition: background-color 0.2s ease;
+		flex: 1;
+	}
+
+	.primary-btn:hover {
+		background: var(--accent-hover);
 	}
 
 	@media (max-width: 768px) {

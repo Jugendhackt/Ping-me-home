@@ -3,6 +3,7 @@
 	import { onMount } from 'svelte';
 	import ProfileAvatar from '$lib/components/ProfileAvatar.svelte';
 	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
 	
 	let { data, children }: { data: LayoutData, children: any } = $props();
 	let theme = $state('light');
@@ -62,13 +63,13 @@
 	<!-- Header -->
 	<header class="header">
 		<div class="header-content">
-			<h1 class="app-title">Ping me Home!</h1>
-			
-			<!-- Navigation -->
-			<nav class="main-nav">
-				<a href="/app" class="nav-link">Dashboard</a>
-				<a href="/app/rooms" class="nav-link">Rooms</a>
-			</nav>
+			<a href="/app" class="app-title" style="text-decoration: none; cursor: pointer;">
+				{#if page.route.id === '/app'}
+					Ping me Home!
+				{:else}
+					← Back to Dashboard
+				{/if}
+			</a>
 			
 			<div class="header-actions">
 				<button class="theme-toggle" onclick={toggleTheme} aria-label="Toggle theme">
@@ -150,31 +151,6 @@
 		font-weight: 700;
 		margin: 0;
 		color: var(--text-primary);
-	}
-
-	.main-nav {
-		display: flex;
-		align-items: center;
-		gap: 20px;
-	}
-
-	.nav-link {
-		color: var(--text-secondary);
-		text-decoration: none;
-		padding: 8px 12px;
-		border-radius: 6px;
-		font-weight: 500;
-		transition: all 0.2s ease;
-	}
-
-	.nav-link:hover {
-		color: var(--text-primary);
-		background: var(--bg-tertiary);
-	}
-
-	.nav-link:global(.active) {
-		color: var(--accent-color);
-		background: var(--accent-bg);
 	}
 	
 	.header-actions {
@@ -310,15 +286,6 @@
 		
 		.app-title {
 			font-size: 1.3rem;
-		}
-
-		.main-nav {
-			gap: 10px;
-		}
-
-		.nav-link {
-			padding: 6px 8px;
-			font-size: 0.9rem;
 		}
 		
 		.user-name {
