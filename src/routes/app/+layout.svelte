@@ -67,7 +67,7 @@
 				{#if page.route.id === '/app'}
 					Ping me Home!
 				{:else}
-					← Back to Dashboard
+					<span class="back-arrow">←</span> Back to Dashboard
 				{/if}
 			</a>
 			
@@ -311,5 +311,15 @@
 			padding: 6px 10px;
 			font-size: 1rem;
 		}
+	}
+
+	.back-arrow {
+		position: relative;
+		right: 0px;
+		transition: right 0.1s ease-in-out;
+	}
+
+	a:hover .back-arrow {
+		right: 7px;
 	}
 </style>
