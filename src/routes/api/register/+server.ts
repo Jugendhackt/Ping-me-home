@@ -26,7 +26,6 @@ export const POST: RequestHandler = async ({ request }) => {
 			user: {
 				uid: user.uid,
 				email: user.email,
-				emailVerified: user.emailVerified
 			}
 		});
 		
