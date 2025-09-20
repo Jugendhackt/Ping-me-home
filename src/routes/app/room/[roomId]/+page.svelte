@@ -71,7 +71,9 @@
                         {/if}</span>
                         <span class="member-status status-{member.status}">{member.status}</span>
                     </summary>
-                    (TODO: Show details about the user's status)
+                    <div class="member-contents">
+                        (TODO: Show details about the user's status)
+                    </div>
                 </details>
             {/each}
         </div>
@@ -112,10 +114,27 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 0.5rem;
         background: var(--bg-primary);
         border-radius: 8px;
         border: 1px solid var(--border-color);
+    }
+
+    .member-item summary {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 10px;
+        border-bottom: 1px solid var(--border-color);
+        border-radius: 8px;
+    }
+
+    .member-item summary, .member-contents {
+        padding: 0.5rem;
+    }
+
+    .member-item summary:hover {
+        background: var(--bg-hover);
+        cursor: pointer;
     }
 
     .member-uid {
@@ -188,13 +207,6 @@
     }
     .copy-join-url-button:hover {
         background: var(--bg-primary);
-    }
-
-    .member-item summary {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        gap: 10px;
     }
 </style>
 
