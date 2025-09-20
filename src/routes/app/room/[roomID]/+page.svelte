@@ -5,12 +5,7 @@
     
     $: room = data.room;
     $: roomId = data.roomId;
-    
-    // Convert members object to array for easier display
-    $: membersList = Object.entries(room.members).map(([uid, role]) => ({
-        uid,
-        role
-    }));
+    $: members = data.members;
 </script>
 
 <div class="room-info">
@@ -25,16 +20,16 @@
             <strong>URL Joining Allowed:</strong> {room.allowUrlJoining ? 'Yes' : 'No'}
         </div>
         <div class="info-item">
-            <strong>Total Members:</strong> {membersList.length}
+            <strong>Total Members:</strong> {members.length}
         </div>
     </div>
     
     <div class="members-section">
         <h2>Members</h2>
         <div class="members-list">
-            {#each membersList as member}
+            {#each members as member}
                 <div class="member-item">
-                    <span class="member-uid">{member.uid}</span>
+                    <span class="member-name">{member.displayName}</span>
                     <span class="member-role role-{member.role}">{member.role}</span>
                 </div>
             {/each}

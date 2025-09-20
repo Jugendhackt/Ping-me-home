@@ -1,6 +1,8 @@
 import { validateRoomApiRequest } from "$lib/server/apiUtils";
 import { error } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
+import { get, ref } from "firebase/database";
+import { db } from "$lib/FirebaseConfig";
 
 export const load: PageServerLoad = async ({ params, locals }) => {
     try {
@@ -16,10 +18,36 @@ export const load: PageServerLoad = async ({ params, locals }) => {
             }
         }
 
+        const members: {
+            uid: string;
+            displayName: string;
+            role: string;
+        }[] = [];
+
+        for (const [uid, role] of Object.entries(room.members)) {
+            if (role === 'invited') continue;
+            const userRef = ref(db, `users/${uid}`);
+            const userSnap = await get(userRef);
+            if (userSnap.exists()) {
+                const userData = userSnap.val();
+                members.push({
+                    uid: uid,
+                    displayName: userData.displayName || 'Unknown User',
+                    role: role,
+                });
+            } else {
+                members.push({
+                    uid: uid,
+                    displayName: 'N/A (Failed to load user data)',
+                    role: role,
+                });
+            }
+        }
 
         return {
             room: room,
-            roomId: params.roomID
+            roomId: params.roomID,
+            members: members,
         };
     } catch (err) {
         console.error('Failed to load room data:', err);
