@@ -9,6 +9,7 @@
     $: roomId = data.roomId;
     $: members = data.members;
     $: isOwner = data.isOwner;
+    $: user = data.user;
 
     const copyJoinUrl = () => {
         const joinUrl = `${window.location.origin}/app/room/${roomId}/join`;
@@ -120,7 +121,7 @@
                             {/if}</span>
                         </div>
                         <div class="align-center">
-                            {#if isOwner}
+                            {#if isOwner && member.uid !== user.uid}
                                 <button class="icon-button" onclick={kick(member)}>
                                     {@render kickIcon()}
                                 </button>
