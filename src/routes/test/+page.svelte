@@ -1,21 +1,11 @@
 <script lang="ts">
   import { onMount } from 'svelte';
 
-  // Eingabewert für Adresse oder Koordinaten
-  // Zweck: Bindet das Textfeld an diese Variable, damit der Benutzer etwas eingeben kann
   let addressInput = '';
-
-  // Variablen für die gespeicherten Koordinaten
-  // Zweck: Speichert die Latitude und Longitude für spätere Nutzung oder Anzeige
   let latitude: number | null = null;
   let longitude: number | null = null;
-
-  // Statusnachrichten für Erfolg oder Fehler
-  // Zweck: Zeigt dem Benutzer Meldungen wie 'Koordinaten übernommen' oder Fehler an
   let message = '';
 
-  // Prüfen, ob lokale Koordinaten bereits im localStorage gespeichert sind
-  // Zweck: Lädt die letzten Koordinaten beim Laden der Seite automatisch
   onMount(() => {
     const saved = localStorage.getItem('spawnCoords');
     if (saved) {
@@ -25,25 +15,19 @@
     }
   });
 
-  // Validierungsfunktion für Koordinaten
-  // Zweck: Sicherstellen, dass Latitude und Longitude innerhalb gültiger Werte liegen
   function validateCoords(lat: number, lng: number) {
     return lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
   }
 
-  // Funktion, um Adresse oder Koordinaten zu übernehmen
-  // Zweck: Verarbeitet die Eingabe und speichert gültige Koordinaten im localStorage
   async function useAddress(addr: string) {
-    if (!addr.trim()) {            //was macht addr trim?                                                         
+    if (!addr.trim()) {
       message = 'Bitte eine Adresse oder Koordinaten eingeben.';
       return;
     }
 
-    // Prüfen, ob Eingabe direkt Koordinaten sind (Format: lat,lng)
-    // Zweck: Ermöglicht Eingabe von direkten Koordinaten statt Adresse
     const coordMatch = addr.trim().match(/^(-?\d+(\.\d+)?),\s*(-?\d+(\.\d+)?)$/);
     if (coordMatch) {
-      const lat = parseFloat(coordMatch[1]);  // woher kommen die variablen?
+      const lat = parseFloat(coordMatch[1]);
       const lng = parseFloat(coordMatch[3]);
 
       if (!validateCoords(lat, lng)) {
@@ -51,7 +35,6 @@
         return;
       }
 
-      // Koordinaten speichern und Nachricht ausgeben
       latitude = lat;
       longitude = lng;
       localStorage.setItem('spawnCoords', JSON.stringify({ lat, lng }));
@@ -59,8 +42,6 @@
       return;
     }
 
-    // Adresse geocoden via OpenStreetMap Nominatim API
-    // Zweck: Wandelt eine Adresse in Latitude und Longitude um
     try {
       const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addr)}`);
       const data = await response.json();
@@ -70,7 +51,6 @@
         return;
       }
 
-      // Koordinaten aus der API-Antwort extrahieren
       const lat = parseFloat(data[0].lat);
       const lng = parseFloat(data[0].lon);
 
@@ -79,7 +59,6 @@
         return;
       }
 
-      // Koordinaten speichern und Nachricht ausgeben
       latitude = lat;
       longitude = lng;
       localStorage.setItem('spawnCoords', JSON.stringify({ lat, lng }));
@@ -91,8 +70,6 @@
     }
   }
 
-  // Funktion für die aktuelle Position via Geolocation API
-  // Zweck: Holt die aktuelle GPS-Position des Benutzers und speichert sie
   function useCurrentPosition() {
     if (!navigator.geolocation) {
       message = 'Geolocation wird von diesem Browser nicht unterstützt.';
@@ -109,7 +86,6 @@
           return;
         }
 
-        // Koordinaten speichern und Nachricht ausgeben
         latitude = lat;
         longitude = lng;
         localStorage.setItem('spawnCoords', JSON.stringify({ lat, lng }));
@@ -123,50 +99,113 @@
   }
 </script>
 
-<div class="profile-section">
+<div class="profile-section address-section">
   <div class="section-header">
     <h2>Adresse / Koordinaten</h2>
     <p>Trage eine Adresse ein oder direkt Koordinaten (lat,lng)</p>
   </div>
 
   <div class="profile-form">
-    <!-- Eingabefeld für Adresse oder Koordinaten -->
-    <!-- Zweck: Ermöglicht dem Benutzer die Eingabe von Adresse oder Koordinaten -->
     <div class="form-group">
       <label for="address">Adresse oder Koordinaten</label>
-      <input
-        id="address"
-        type="text"
-        bind:value={addressInput}
-        placeholder="z.B. Musterstraße 1, Berlin oder 52.5200,13.4050"
-      />
+      <input id="address" type="text" bind:value={addressInput} placeholder="z.B. Musterstraße 1, Berlin oder 52.5200,13.4050" />
       <small class="help-text">Wenn du eine Adresse eingibst, wird sie automatisch in Koordinaten umgewandelt.</small>
     </div>
 
-    <!-- Buttons für Adresse übernehmen oder aktuelle Position -->
-    <!-- Zweck: Löst die jeweiligen Funktionen aus, um Koordinaten zu speichern -->
-    <div class="form-group" style="display:flex; gap:0.5rem; flex-wrap: wrap;">
-      <button type="button" class="update-btn" on:click={() => useAddress(addressInput)}>
-        Adresse übernehmen
-      </button>
-
-      <button type="button" class="update-btn" on:click={useCurrentPosition}>
-        Aktuelle Position benutzen
-      </button>
+    <div class="form-group button-group">
+      <button type="button" class="update-btn" on:click={() => useAddress(addressInput)}>Adresse übernehmen</button>
+      <button type="button" class="update-btn" on:click={useCurrentPosition}>Aktuelle Position benutzen</button>
     </div>
 
-    <!-- Anzeige der aktuellen Koordinaten, wenn vorhanden -->
-    <!-- Zweck: Zeigt dem Benutzer die aktuell gespeicherten Koordinaten an -->
     {#if latitude !== null && longitude !== null}
-      <div style="margin-top:0.5rem; font-size:0.9rem;">
-        <strong>Aktuelle Koordinaten:</strong> {latitude}, {longitude}
-      </div>
+      <div class="coord-display">Aktuelle Koordinaten: {latitude}, {longitude}</div>
     {/if}
 
-    <!-- Statusnachrichten -->
-    <!-- Zweck: Zeigt Erfolg oder Fehlermeldungen in konsistentem Design -->
     {#if message}
-      <div class="success-message" style="margin-top:0.5rem;">{message}</div>
+      <div class="success-message">{message}</div>
     {/if}
   </div>
 </div>
+
+<style>
+.address-section {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.address-section .section-header h2 {
+  color: var(--text-primary);
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+}
+
+.address-section .section-header p {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.address-section .profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.address-section .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.address-section .form-group input {
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  transition: border-color 0.2s ease;
+}
+
+.address-section .form-group input:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.address-section .button-group {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.address-section .update-btn {
+  background: var(--accent-color);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.address-section .update-btn:hover {
+  background: var(--accent-hover);
+}
+
+.address-section .coord-display {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+}
+
+.address-section .success-message {
+  margin-top: 0.5rem;
+}
+</style>
