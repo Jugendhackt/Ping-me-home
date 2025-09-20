@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { copyIcon, crownIcon, doorIcon, kickIcon } from '$lib/components/Icons.svelte';
+	import { copyIcon, crownIcon, deleteIcon, doorIcon, kickIcon } from '$lib/components/Icons.svelte';
     import ProfileAvatar from '$lib/components/ProfileAvatar.svelte';
     import type { PageData } from './$types';
     
@@ -38,6 +38,28 @@
             alert('An error occurred. Please try again.');
         });
     };
+
+    const deleteRoom = () => {
+        const confirmed = confirm('Do you really want to delete the room?');
+        if (!confirmed) {
+            return;
+        }
+        fetch(`/api/room/${roomId}/delete`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }).then(response => {
+            if (response.ok) {
+                window.location.href = '/app/rooms';
+            } else {
+                alert('Failed to delete the room. Please try again.');
+            }
+        }).catch(error => {
+            console.error('Error deleting room:', error);
+            alert('An error occurred. Please try again.');
+        });
+    }
 
     const kick = (member: {
         uid: string,
@@ -115,7 +137,11 @@
     
     <div class="room-actions">
         <h2>Actions</h2>
-        <button onclick={leaveRoom} class="leave-room-button">{@render doorIcon()}Leave Room</button>
+        {#if isOwner}
+            <button onclick={deleteRoom} class="delete-room-button">{@render deleteIcon('white')}Delete Room</button>
+        {:else}
+            <button onclick={leaveRoom} class="leave-room-button">{@render doorIcon()}Leave Room</button>
+        {/if}
     </div>
 </div>
 
@@ -234,7 +260,7 @@
         align-items: center;
     }
 
-    .leave-room-button {
+    .leave-room-button, .delete-room-button {
         background-color: #f44336;
         color: white;
     }
