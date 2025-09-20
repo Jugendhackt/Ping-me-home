@@ -19,7 +19,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		const userCredential = await createUserWithEmailAndPassword(auth, email, password);
 		const user = userCredential.user;
 		
-		console.log('✅ User created successfully:', user.email);
+		console.log('✅ User created successfully:', user.email , '!');
 		
 		return json({ 
 			success: true, 
