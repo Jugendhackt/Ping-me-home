@@ -1,327 +1,987 @@
 <script lang="ts">
-    import type { PageData } from '../rooms/$types';
-    
-    let { data }: { data: PageData } = $props();
+	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
+	import type { PageData } from './$types';
 
-    let statusMessage = $state('');
-    let statusIsError = $state(false);
-    let statusVisible = $state(false);
+	let { data }: { data: PageData } = $props();
 
-    // Form values
-    let roomName = $state('');
-    let inviteRoomId = $state('');
-    let userToAdd = $state('');
-    let acceptRoomId = $state('');
-    let declineRoomId = $state('');
-    let kickRoomId = $state('');
-    let userToKick = $state('');
-    let leaveRoomId = $state('');
-    let deleteRoomId = $state('');
+	let viewMode = $state<'grid' | 'list'>('grid');
+	let deletingRoomId: string | null = $state(null);
+	let searchQuery = $state('');
 
-    function showStatus(message: string, isError = false) {
-        statusMessage = message;
-        statusIsError = isError;
-        statusVisible = true;
-    }
+	// Modal state
+	let showCreateModal = $state(false);
+	let isCreating = $state(false);
+	let newRoomName = $state('');
+	let allowUrlJoining = $state(true);
 
-    async function makeRequest(url: string, method = 'POST', body?: any) {
-        try {
-            const options: RequestInit = {
-                method,
-                headers: { 'Content-Type': 'application/json' },
-            };
-            if (body) {
-                options.body = JSON.stringify(body);
-            }
-            
-            const response = await fetch(url, options);
-            const data = await response.json();
-            
-            if (response.ok) {
-                showStatus(`Success: ${JSON.stringify(data, null, 2)}`, false);
-            } else {
-                showStatus(`Error ${response.status}: ${data.message || 'Unknown error'}`, true);
-            }
-        } catch (error) {
-            const errorMsg = error instanceof Error ? error.message : 'Unknown error';
-            showStatus(`Network Error: ${errorMsg}`, true);
-        }
-    }
+	// Filter rooms based on search query
+	let filteredRooms = $derived(data.rooms.filter(room => 
+		room.name.toLowerCase().includes(searchQuery.toLowerCase())
+	));
 
-    async function createRoom(e: Event) {
-        e.preventDefault();
-        await makeRequest('/api/rooms/create', 'POST', { name: roomName });
-        roomName = '';
-    }
+	async function deleteRoom(roomId: string, roomName: string) {
+		if (
+			!confirm(
+				`Are you sure you want to delete the room "${roomName}"? This action cannot be undone.`
+			)
+		) {
+			return;
+		}
 
-    async function inviteMember(e: Event) {
-        e.preventDefault();
-        await makeRequest(`/api/room/${inviteRoomId}/invite-member`, 'POST', { userToAdd });
-        inviteRoomId = '';
-        userToAdd = '';
-    }
+		deletingRoomId = roomId;
 
-    async function acceptInvite(e: Event) {
-        e.preventDefault();
-        await makeRequest(`/api/room/${acceptRoomId}/accept-invite`, 'POST');
-        acceptRoomId = '';
-    }
+		try {
+			const response = await fetch(`/api/room/${roomId}/delete`, {
+				method: 'POST'
+			});
 
-    async function declineInvite(e: Event) {
-        e.preventDefault();
-        await makeRequest(`/api/room/${declineRoomId}/decline-invite`, 'POST');
-        declineRoomId = '';
-    }
+			if (!response.ok) {
+				const error = await response.json();
+				throw new Error(error.message || 'Failed to delete room');
+			}
 
-    async function kickMember(e: Event) {
-        e.preventDefault();
-        await makeRequest(`/api/room/${kickRoomId}/kick`, 'POST', { userToKick });
-        kickRoomId = '';
-        userToKick = '';
-    }
+			// Reload the page to refresh the room list
+			goto($page.url.pathname, { invalidateAll: true });
+		} catch (error) {
+			console.error('Error deleting room:', error);
+			alert(`Failed to delete room: ${error instanceof Error ? error.message : 'Unknown error'}`);
+		} finally {
+			deletingRoomId = null;
+		}
+	}
 
-    async function leaveRoom(e: Event) {
-        e.preventDefault();
-        await makeRequest(`/api/room/${leaveRoomId}/leave`, 'POST');
-        leaveRoomId = '';
-    }
+	async function createRoom() {
+		if (!newRoomName.trim()) return;
 
-    async function deleteRoom(e: Event) {
-        e.preventDefault();
-        if (confirm('Are you sure you want to delete this room?')) {
-            await makeRequest(`/api/room/${deleteRoomId}/delete`, 'POST');
-            deleteRoomId = '';
-        }
-    }
+		isCreating = true;
+
+		try {
+			const response = await fetch('/api/rooms/create', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					name: newRoomName.trim(),
+					allowUrlJoining: allowUrlJoining
+				})
+			});
+
+			if (!response.ok) {
+				const error = await response.json();
+				throw new Error(error.message || 'Failed to create room');
+			}
+
+			const result = await response.json();
+			
+			// Reset form and close modal
+			newRoomName = '';
+			allowUrlJoining = true;
+			showCreateModal = false;
+
+			// Reload the page to show the new room
+			goto($page.url.pathname, { invalidateAll: true });
+		} catch (error) {
+			console.error('Error creating room:', error);
+			alert(`Failed to create room: ${error instanceof Error ? error.message : 'Unknown error'}`);
+		} finally {
+			isCreating = false;
+		}
+	}
+
+	function openCreateModal() {
+		newRoomName = '';
+		allowUrlJoining = true;
+		showCreateModal = true;
+	}
+
+	function closeCreateModal() {
+		if (isCreating) return; // Prevent closing while creating
+		showCreateModal = false;
+		newRoomName = '';
+		allowUrlJoining = true;
+	}
+
+	function getRoleIcon(role: string): string {
+		switch (role) {
+			case 'owner': return '👑';
+			case 'member': return '👤';
+			case 'invited': return '📬';
+			default: return '❓';
+		}
+	}
+
+	function getRoleDisplayName(role: string): string {
+		switch (role) {
+			case 'owner': return 'Owner';
+			case 'member': return 'Member';
+			case 'invited': return 'Invited';
+			default: return role;
+		}
+	}
+
+	function sortRoomsByRole(rooms: typeof data.rooms) {
+		const rolePriority = { 'owner': 3, 'member': 2, 'invited': 1 } as const;
+		return [...rooms].sort((a, b) => {
+			const priorityDiff = rolePriority[b.role] - rolePriority[a.role];
+			if (priorityDiff !== 0) return priorityDiff;
+			return a.name.localeCompare(b.name);
+		});
+	}
+
+	let sortedRooms = $derived(sortRoomsByRole(filteredRooms));
 </script>
 
 <svelte:head>
-    <title>Room Management - JHCGN</title>
+	<title>My Rooms - Ping Me Home</title>
 </svelte:head>
 
-<!-- Room API Test Interface -->
-<div class="test-container">
-    <div class="page-header">
-        <h1>🏠 Room Management</h1>
-        <p>Welcome, {data.user?.displayName || data.user?.email || 'User'}! Manage your rooms here.</p>
-    </div>
-    
-    {#if statusVisible}
-        <div class="status" class:error={statusIsError}>
-            {statusMessage}
-        </div>
-    {/if}
+<div class="rooms-page">
+	<!-- Page Header -->
+	<div class="page-header">
+		<div class="header-content">
+			<div class="title-section">
+				<h1>🏠 My Rooms</h1>
+				<p>Manage and browse your room memberships</p>
+			</div>
+			<div class="header-actions">
+				<button onclick={openCreateModal} class="btn btn-primary">
+					<span>➕</span>
+					Create Room
+				</button>
+			</div>
+		</div>
+	</div>
 
-    <!-- Create Room -->
-    <div class="form-section">
-        <h3>Create Room</h3>
-        <form onsubmit={createRoom}>
-            <input type="text" bind:value={roomName} placeholder="Room Name" required />
-            <button type="submit">Create Room</button>
-        </form>
-    </div>
+	<!-- Controls Section -->
+	<div class="controls-section">
+		<div class="search-bar">
+			<div class="search-input-wrapper">
+				<span class="search-icon">🔍</span>
+				<input 
+					type="text" 
+					placeholder="Search rooms..." 
+					class="search-input"
+					bind:value={searchQuery}
+				/>
+			</div>
+		</div>
+		
+		<div class="view-controls">
+			<button 
+				class="view-toggle"
+				class:active={viewMode === 'grid'}
+				onclick={() => viewMode = 'grid'}
+				aria-label="Grid view"
+			>
+				⊞
+			</button>
+			<button 
+				class="view-toggle"
+				class:active={viewMode === 'list'}
+				onclick={() => viewMode = 'list'}
+				aria-label="List view"
+			>
+				☰
+			</button>
+		</div>
+	</div>
 
-    <!-- Invite Member -->
-    <div class="form-section">
-        <h3>Invite Member</h3>
-        <form onsubmit={inviteMember}>
-            <input type="text" bind:value={inviteRoomId} placeholder="Room ID" required />
-            <input type="text" bind:value={userToAdd} placeholder="User ID to invite" required />
-            <button type="submit">Invite Member</button>
-        </form>
-    </div>
+	<!-- Rooms Content -->
+	{#if data.rooms.length === 0}
+		<div class="empty-state">
+			<div class="empty-icon">🏠</div>
+			<h2>No rooms yet</h2>
+			<p>
+				You're not a member of any rooms yet. Create your first room or ask someone to invite you!
+			</p>
+			<button onclick={openCreateModal} class="btn btn-primary">Create Your First Room</button>
+		</div>
+	{:else if sortedRooms.length === 0}
+		<div class="empty-state">
+			<div class="empty-icon">🔍</div>
+			<h2>No rooms found</h2>
+			<p>No rooms match your search criteria. Try adjusting your search.</p>
+		</div>
+	{:else}
+		<div class="rooms-container" class:list-view={viewMode === 'list'} class:grid-view={viewMode === 'grid'}>
+			{#each sortedRooms as room (room.roomId)}
+				<div class="room-card">
+					<div class="room-header">
+						<div class="room-title">
+							<h3 class="room-name">{room.name}</h3>
+							<div class="room-role">
+								<span class="role-icon">{getRoleIcon(room.role)}</span>
+								<span class="role-text">{getRoleDisplayName(room.role)}</span>
+							</div>
+						</div>
+					</div>
 
-    <!-- Accept Invite -->
-    <div class="form-section">
-        <h3>Accept Invite</h3>
-        <form onsubmit={acceptInvite}>
-            <input type="text" bind:value={acceptRoomId} placeholder="Room ID" required />
-            <button type="submit">Accept Invite</button>
-        </form>
-    </div>
+					<div class="room-info">
+						<div class="info-item">
+							<span class="info-icon">👥</span>
+							<span class="info-text">{room.memberCount} member{room.memberCount !== 1 ? 's' : ''}</span>
+						</div>
+						{#if room.allowUrlJoining}
+							<div class="info-item">
+								<span class="info-icon">🌐</span>
+								<span class="info-text">Public joining</span>
+							</div>
+						{/if}
+					</div>
 
-    <!-- Decline Invite -->
-    <div class="form-section">
-        <h3>Decline Invite</h3>
-        <form onsubmit={declineInvite}>
-            <input type="text" bind:value={declineRoomId} placeholder="Room ID" required />
-            <button type="submit">Decline Invite</button>
-        </form>
-    </div>
+					<div class="room-actions">
+						<a href="/app/room/{room.roomId}" class="btn btn-secondary">
+							{#if room.role === 'invited'}
+								<span>📬</span>
+								View Invite
+							{:else}
+								<span>🚪</span>
+								Enter Room
+							{/if}
+						</a>
 
-    <!-- Kick Member -->
-    <div class="form-section">
-        <h3>Kick Member</h3>
-        <form onsubmit={kickMember}>
-            <input type="text" bind:value={kickRoomId} placeholder="Room ID" required />
-            <input type="text" bind:value={userToKick} placeholder="User ID to kick" required />
-            <button type="submit">Kick Member</button>
-        </form>
-    </div>
-
-    <!-- Leave Room -->
-    <div class="form-section">
-        <h3>Leave Room</h3>
-        <form onsubmit={leaveRoom}>
-            <input type="text" bind:value={leaveRoomId} placeholder="Room ID" required />
-            <button type="submit">Leave Room</button>
-        </form>
-    </div>
-
-    <!-- Delete Room -->
-    <div class="form-section">
-        <h3>Delete Room</h3>
-        <form onsubmit={deleteRoom}>
-            <input type="text" bind:value={deleteRoomId} placeholder="Room ID" required />
-            <button type="submit" class="delete-btn">Delete Room</button>
-        </form>
-    </div>
-
-    <div class="debug-info">
-        <h4>Debug Info:</h4>
-        <p>User ID: {data.user?.uid || 'Not available'}</p>
-        <p>Email: {data.user?.email || 'Not available'}</p>
-    </div>
+						{#if room.role === 'owner'}
+							<button
+								class="btn btn-danger"
+								disabled={deletingRoomId === room.roomId}
+								onclick={() => deleteRoom(room.roomId, room.name)}
+							>
+								{#if deletingRoomId === room.roomId}
+									<span class="spinner">⏳</span>
+									Deleting...
+								{:else}
+									<span>🗑️</span>
+									Delete
+								{/if}
+							</button>
+						{/if}
+					</div>
+				</div>
+			{/each}
+		</div>
+	{/if}
 </div>
 
+<!-- Create Room Modal -->
+{#if showCreateModal}
+	<!-- svelte-ignore a11y-click-events-have-key-events -->
+	<!-- svelte-ignore a11y-no-static-element-interactions -->
+	<div class="modal-backdrop" onclick={closeCreateModal}>
+		<!-- svelte-ignore a11y-click-events-have-key-events -->
+		<!-- svelte-ignore a11y-no-static-element-interactions -->
+		<div class="modal-content" onclick={(e) => e.stopPropagation()}>
+			<div class="modal-header">
+				<h2>🏠 Create New Room</h2>
+				<button class="modal-close" onclick={closeCreateModal} aria-label="Close modal">✕</button>
+			</div>
+
+			<form onsubmit={(e) => { e.preventDefault(); createRoom(); }} class="modal-form">
+				<div class="form-group">
+					<label for="room-name">Room Name</label>
+					<input 
+						id="room-name"
+						type="text" 
+						bind:value={newRoomName}
+						placeholder="Enter room name..."
+						required
+						maxlength="50"
+						disabled={isCreating}
+						class="form-input"
+					/>
+				</div>
+
+				<div class="form-group">
+					<label class="checkbox-label">
+						<input 
+							type="checkbox" 
+							bind:checked={allowUrlJoining}
+							disabled={isCreating}
+							class="checkbox-input"
+						/>
+						<span class="checkbox-custom"></span>
+						<span class="checkbox-text">
+							Allow anyone to join with a link
+							<small>People can join this room using a URL without an invitation</small>
+						</span>
+					</label>
+				</div>
+
+				<div class="modal-actions">
+					<button 
+						type="button" 
+						onclick={closeCreateModal}
+						disabled={isCreating}
+						class="btn btn-secondary"
+					>
+						Cancel
+					</button>
+					<button 
+						type="submit"
+						disabled={isCreating || !newRoomName.trim()}
+						class="btn btn-primary"
+					>
+						{#if isCreating}
+							<span class="spinner">⏳</span>
+							Creating...
+						{:else}
+							<span>🏠</span>
+							Create Room
+						{/if}
+					</button>
+				</div>
+			</form>
+		</div>
+	</div>
+{/if}
+
 <style>
-    .test-container {
-        max-width: 800px;
-        margin: 20px auto;
-        padding: 20px;
-        font-family: var(--font-body, Arial, sans-serif);
-    }
+	/* Main container */
+	.rooms-page {
+		min-height: calc(100vh - 80px);
+		color: var(--text-primary);
+	}
 
-    .page-header {
-        text-align: center;
-        margin-bottom: 30px;
-        padding: 20px;
-        background: var(--bg-secondary, #f8f9fa);
-        border-radius: 8px;
-    }
+	/* Page Header */
+	.page-header {
+		background: var(--bg-secondary);
+		border: 1px solid var(--border-color);
+		border-radius: 12px;
+		box-shadow: var(--shadow-sm);
+		margin-bottom: 2rem;
+	}
 
-    .page-header h1 {
-        margin: 0 0 10px 0;
-        color: var(--text-primary, #333);
-    }
+	.header-content {
+		padding: 2rem;
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-start;
+		gap: 2rem;
+	}
 
-    .page-header p {
-        margin: 0;
-        color: var(--text-secondary, #666);
-    }
+	.title-section h1 {
+		font-size: 2rem;
+		font-weight: 700;
+		margin: 0 0 0.5rem 0;
+		color: var(--text-primary);
+	}
 
-    .status {
-        margin: 20px 0;
-        padding: 15px;
-        background: var(--success-bg, #e8f5e8);
-        color: var(--success-text, #2e7d32);
-        border-radius: 6px;
-        border-left: 4px solid var(--success-color, #4caf50);
-    }
+	.title-section p {
+		color: var(--text-secondary);
+		margin: 0;
+		font-size: 1rem;
+	}
 
-    .status.error {
-        background: var(--error-bg, #ffebee);
-        color: var(--error-text, #d32f2f);
-        border-left-color: var(--error-color, #f44336);
-    }
+	.header-actions {
+		display: flex;
+		gap: 1rem;
+		align-items: center;
+	}
 
-    .form-section {
-        border: 1px solid var(--border-color, #ddd);
-        margin: 20px 0;
-        padding: 20px;
-        border-radius: 8px;
-        background: var(--bg-primary, white);
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
+	/* Controls Section */
+	.controls-section {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 1rem;
+		margin-bottom: 2rem;
+	}
 
-    .form-section h3 {
-        margin: 0 0 15px 0;
-        color: var(--text-primary, #333);
-        font-size: 1.1rem;
-    }
+	.search-bar {
+		flex: 1;
+		max-width: 400px;
+	}
 
-    .form-section form {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-    }
+	.search-input-wrapper {
+		position: relative;
+		display: flex;
+		align-items: center;
+	}
 
-    .form-section input {
-        padding: 12px;
-        border: 1px solid var(--border-color, #ddd);
-        border-radius: 6px;
-        font-size: 14px;
-        background: var(--bg-primary, white);
-        color: var(--text-primary, #333);
-    }
+	.search-icon {
+		position: absolute;
+		left: 12px;
+		font-size: 1rem;
+		color: var(--text-muted);
+		pointer-events: none;
+	}
 
-    .form-section input:focus {
-        outline: none;
-        border-color: var(--accent-color, #007bff);
-        box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
-    }
+	.search-input {
+		width: 100%;
+		padding: 0.75rem 1rem 0.75rem 2.5rem;
+		border: 1px solid var(--border-color);
+		border-radius: 8px;
+		background: var(--bg-secondary);
+		color: var(--text-primary);
+		font-size: 0.95rem;
+		transition: all 0.2s ease;
+	}
 
-    .form-section button {
-        padding: 12px 16px;
-        background: var(--accent-color, #007bff);
-        color: white;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 14px;
-        font-weight: 500;
-        transition: background-color 0.2s ease;
-    }
+	.search-input:focus {
+		outline: none;
+		border-color: var(--accent-color);
+		box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+	}
 
-    .form-section button:hover {
-        background: var(--accent-hover, #0056b3);
-    }
+	.search-input::placeholder {
+		color: var(--text-muted);
+	}
 
-    .form-section button:active {
-        transform: translateY(1px);
-    }
+	.view-controls {
+		display: flex;
+		background: var(--bg-secondary);
+		border: 1px solid var(--border-color);
+		border-radius: 8px;
+		padding: 4px;
+	}
 
-    .delete-btn {
-        background: var(--danger-color, #ff4444) !important;
-    }
+	.view-toggle {
+		background: none;
+		border: none;
+		padding: 8px 12px;
+		cursor: pointer;
+		color: var(--text-secondary);
+		font-size: 1.1rem;
+		border-radius: 6px;
+		transition: all 0.2s ease;
+	}
 
-    .delete-btn:hover {
-        background: var(--danger-hover, #cc3333) !important;
-    }
+	.view-toggle:hover {
+		color: var(--text-primary);
+		background: var(--bg-hover);
+	}
 
-    .debug-info {
-        margin-top: 30px;
-        padding: 15px;
-        background: var(--bg-tertiary, #f0f0f0);
-        border-radius: 6px;
-        font-size: 0.9rem;
-        color: var(--text-secondary, #666);
-    }
+	.view-toggle.active {
+		color: var(--accent-color);
+		background: var(--accent-light);
+	}
 
-    .debug-info h4 {
-        margin: 0 0 10px 0;
-        color: var(--text-primary, #333);
-    }
+	/* Empty State */
+	.empty-state {
+		text-align: center;
+		padding: 4rem 2rem;
+		background: var(--bg-secondary);
+		border: 1px solid var(--border-color);
+		border-radius: 12px;
+		margin: 2rem auto;
+		max-width: 500px;
+	}
 
-    .debug-info p {
-        margin: 5px 0;
-        font-family: monospace;
-    }
+	.empty-icon {
+		font-size: 4rem;
+		margin-bottom: 1.5rem;
+		opacity: 0.7;
+	}
 
-    @media (min-width: 768px) {
-        .form-section form {
-            flex-direction: row;
-            align-items: center;
-        }
+	.empty-state h2 {
+		font-size: 1.5rem;
+		font-weight: 600;
+		color: var(--text-primary);
+		margin: 0 0 1rem 0;
+	}
 
-        .form-section input {
-            margin-right: 10px;
-            flex: 1;
-        }
+	.empty-state p {
+		color: var(--text-secondary);
+		margin: 0 0 2rem 0;
+		line-height: 1.6;
+	}
 
-        .form-section button {
-            white-space: nowrap;
-            flex-shrink: 0;
-        }
-    }
+	/* Rooms Container */
+	.rooms-container {
+		transition: all 0.3s ease;
+	}
+
+	.rooms-container.grid-view {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+		gap: 1.5rem;
+	}
+
+	.rooms-container.list-view {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+	}
+
+	/* Room Cards */
+	.room-card {
+		background: var(--bg-secondary);
+		border: 1px solid var(--border-color);
+		border-radius: 12px;
+		padding: 1.5rem;
+		transition: all 0.2s ease;
+		box-shadow: var(--shadow-sm);
+	}
+
+	.room-card:hover {
+		border-color: var(--border-hover);
+		box-shadow: var(--shadow-md);
+		transform: translateY(-2px);
+	}
+
+	.list-view .room-card {
+		display: flex;
+		align-items: center;
+		gap: 1.5rem;
+		padding: 1.25rem 1.5rem;
+	}
+
+	.list-view .room-header {
+		flex: 1;
+		margin-bottom: 0;
+	}
+
+	.list-view .room-info {
+		margin-bottom: 0;
+		flex-shrink: 0;
+	}
+
+	.list-view .room-actions {
+		flex-shrink: 0;
+		margin-left: auto;
+	}
+
+	/* Room Header */
+	.room-header {
+		margin-bottom: 1rem;
+	}
+
+	.room-title {
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-start;
+		gap: 1rem;
+	}
+
+	.room-name {
+		font-size: 1.25rem;
+		font-weight: 600;
+		color: var(--text-primary);
+		margin: 0;
+		word-break: break-word;
+		flex: 1;
+	}
+
+	.room-role {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		background: var(--bg-tertiary);
+		padding: 0.5rem 0.75rem;
+		border-radius: 20px;
+		white-space: nowrap;
+		border: 1px solid var(--border-color);
+	}
+
+	.role-icon {
+		font-size: 0.9rem;
+	}
+
+	.role-text {
+		font-size: 0.8rem;
+		font-weight: 500;
+		color: var(--text-secondary);
+	}
+
+	/* Room Info */
+	.room-info {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 1rem;
+		margin-bottom: 1.5rem;
+	}
+
+	.info-item {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		background: var(--bg-tertiary);
+		padding: 0.4rem 0.75rem;
+		border-radius: 8px;
+		border: 1px solid var(--border-color);
+	}
+
+	.info-icon {
+		font-size: 0.9rem;
+	}
+
+	.info-text {
+		font-size: 0.85rem;
+		color: var(--text-secondary);
+		font-weight: 500;
+	}
+
+	/* Action Buttons */
+	.room-actions {
+		display: flex;
+		gap: 0.75rem;
+		flex-wrap: wrap;
+	}
+
+	.btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.75rem 1rem;
+		border: 1px solid var(--border-color);
+		border-radius: 8px;
+		text-decoration: none;
+		font-weight: 500;
+		font-size: 0.9rem;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		background: var(--bg-tertiary);
+		color: var(--text-primary);
+	}
+
+	.btn:hover {
+		border-color: var(--border-hover);
+		background: var(--bg-hover);
+		transform: translateY(-1px);
+		box-shadow: var(--shadow-sm);
+	}
+
+	.btn-primary {
+		background: var(--accent-color);
+		color: white;
+		border-color: var(--accent-color);
+	}
+
+	.btn-primary:hover {
+		background: var(--accent-hover);
+		border-color: var(--accent-hover);
+	}
+
+	.btn-secondary {
+		background: var(--bg-secondary);
+		border-color: var(--border-color);
+	}
+
+	.btn-danger {
+		background: var(--error-color);
+		color: white;
+		border-color: var(--error-color);
+	}
+
+	.btn-danger:hover {
+		background: #dc2626;
+		border-color: #dc2626;
+	}
+
+	.btn:disabled {
+		opacity: 0.6;
+		cursor: not-allowed;
+		transform: none;
+	}
+
+	.btn:disabled:hover {
+		transform: none;
+		box-shadow: none;
+	}
+
+	.spinner {
+		animation: spin 1s linear infinite;
+	}
+
+	@keyframes spin {
+		from { transform: rotate(0deg); }
+		to { transform: rotate(360deg); }
+	}
+
+	/* Responsive Design */
+	@media (max-width: 768px) {
+		.header-content {
+			flex-direction: column;
+			align-items: stretch;
+			gap: 1.5rem;
+			padding: 1.5rem;
+		}
+
+		.controls-section {
+			flex-direction: column;
+			align-items: stretch;
+			gap: 1rem;
+		}
+
+		.search-bar {
+			max-width: none;
+		}
+
+		.view-controls {
+			align-self: flex-end;
+		}
+
+		.rooms-container.grid-view {
+			grid-template-columns: 1fr;
+		}
+
+		.list-view .room-card {
+			flex-direction: column;
+			align-items: stretch;
+			gap: 1rem;
+		}
+
+		.list-view .room-actions {
+			margin-left: 0;
+		}
+
+		.room-title {
+			flex-direction: column;
+			gap: 0.75rem;
+			align-items: flex-start;
+		}
+
+		.room-role {
+			align-self: flex-start;
+		}
+
+		.room-actions {
+			flex-direction: column;
+		}
+
+		.btn {
+			justify-content: center;
+		}
+	}
+
+	@media (max-width: 480px) {
+		.page-header {
+			margin-bottom: 1.5rem;
+		}
+
+		.header-content {
+			padding: 1rem;
+		}
+
+		.title-section h1 {
+			font-size: 1.5rem;
+		}
+
+		.room-card {
+			padding: 1rem;
+		}
+
+		.empty-state {
+			padding: 2rem 1rem;
+		}
+
+		.empty-icon {
+			font-size: 3rem;
+		}
+	}
+
+	/* Modal Styles */
+	.modal-backdrop {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: rgba(0, 0, 0, 0.5);
+		backdrop-filter: blur(4px);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: 1000;
+		padding: 1rem;
+	}
+
+	.modal-content {
+		background: var(--bg-primary);
+		border: 1px solid var(--border-color);
+		border-radius: 16px;
+		max-width: 500px;
+		width: 100%;
+		max-height: 90vh;
+		overflow-y: auto;
+		box-shadow: var(--shadow-lg);
+		animation: modalSlideIn 0.2s ease-out;
+	}
+
+	@keyframes modalSlideIn {
+		from {
+			opacity: 0;
+			transform: translateY(-20px) scale(0.95);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0) scale(1);
+		}
+	}
+
+	.modal-header {
+		padding: 1.5rem 1.5rem 0 1.5rem;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+	}
+
+	.modal-header h2 {
+		font-size: 1.5rem;
+		font-weight: 600;
+		color: var(--text-primary);
+		margin: 0;
+	}
+
+	.modal-close {
+		background: none;
+		border: none;
+		font-size: 1.5rem;
+		color: var(--text-secondary);
+		cursor: pointer;
+		padding: 0.25rem;
+		border-radius: 6px;
+		transition: all 0.2s ease;
+		line-height: 1;
+		width: 32px;
+		height: 32px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.modal-close:hover {
+		background: var(--bg-hover);
+		color: var(--text-primary);
+	}
+
+	.modal-form {
+		padding: 1.5rem;
+	}
+
+	.form-group {
+		margin-bottom: 1.5rem;
+	}
+
+	.form-group:last-child {
+		margin-bottom: 0;
+	}
+
+	.form-group label {
+		display: block;
+		font-weight: 500;
+		color: var(--text-primary);
+		margin-bottom: 0.5rem;
+		font-size: 0.9rem;
+	}
+
+	.form-input {
+		width: 100%;
+		padding: 0.75rem 1rem;
+		border: 1px solid var(--border-color);
+		border-radius: 8px;
+		background: var(--bg-secondary);
+		color: var(--text-primary);
+		font-size: 1rem;
+		transition: all 0.2s ease;
+		box-sizing: border-box;
+	}
+
+	.form-input:focus {
+		outline: none;
+		border-color: var(--accent-color);
+		box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+	}
+
+	.form-input:disabled {
+		opacity: 0.6;
+		cursor: not-allowed;
+	}
+
+	.form-input::placeholder {
+		color: var(--text-muted);
+	}
+
+	.checkbox-label {
+		display: flex;
+		align-items: flex-start;
+		gap: 0.75rem;
+		cursor: pointer;
+		font-weight: normal;
+		margin-bottom: 0;
+	}
+
+	.checkbox-input {
+		display: none;
+	}
+
+	.checkbox-custom {
+		width: 20px;
+		height: 20px;
+		border: 2px solid var(--border-color);
+		border-radius: 4px;
+		background: var(--bg-secondary);
+		transition: all 0.2s ease;
+		flex-shrink: 0;
+		position: relative;
+		margin-top: 2px;
+	}
+
+	.checkbox-input:checked + .checkbox-custom {
+		background: var(--accent-color);
+		border-color: var(--accent-color);
+	}
+
+	.checkbox-input:checked + .checkbox-custom::after {
+		content: '✓';
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		color: white;
+		font-size: 12px;
+		font-weight: bold;
+	}
+
+	.checkbox-input:disabled + .checkbox-custom {
+		opacity: 0.6;
+		cursor: not-allowed;
+	}
+
+	.checkbox-text {
+		flex: 1;
+		line-height: 1.4;
+	}
+
+	.checkbox-text small {
+		display: block;
+		color: var(--text-muted);
+		font-size: 0.8rem;
+		margin-top: 0.25rem;
+		line-height: 1.3;
+	}
+
+	.modal-actions {
+		display: flex;
+		gap: 1rem;
+		justify-content: flex-end;
+		margin-top: 2rem;
+		padding-top: 1.5rem;
+		border-top: 1px solid var(--border-color);
+	}
+
+	.modal-actions .btn {
+		min-width: 120px;
+		justify-content: center;
+	}
+
+	/* Modal responsive design */
+	@media (max-width: 520px) {
+		.modal-content {
+			margin: 0;
+			border-radius: 16px 16px 0 0;
+			max-height: 85vh;
+		}
+
+		.modal-actions {
+			flex-direction: column-reverse;
+		}
+
+		.modal-actions .btn {
+			width: 100%;
+			min-width: auto;
+		}
+	}
 </style>
