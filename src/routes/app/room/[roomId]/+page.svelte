@@ -140,7 +140,7 @@
         {#if isOwner}
             <button onclick={deleteRoom} class="delete-room-button">{@render deleteIcon('white')}Delete Room</button>
         {:else}
-            <button onclick={leaveRoom} class="leave-room-button">{@render doorIcon()}Leave Room</button>
+            <button onclick={leaveRoom} class="leave-room-button">{@render doorIcon('white')}Leave Room</button>
         {/if}
     </div>
 </div>
