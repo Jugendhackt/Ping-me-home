@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import PasswordInput from '$lib/components/PasswordInput.svelte';
 	import ProfileAvatar from '$lib/components/ProfileAvatar.svelte';
 	import type { PageData } from './$types';
 	
@@ -207,42 +208,30 @@
 			{#if passwordError}
 				<div class="error-message">{passwordError}</div>
 			{/if}
-			
-			<div class="form-group">
-				<label for="currentPassword">Current Password</label>
-				<input
-					id="currentPassword"
-					type="password"
-					bind:value={currentPassword}
-					placeholder="Enter your current password"
-					required
-					disabled={isUpdatingPassword}
-				/>
-			</div>
-			
-			<div class="form-group">
-				<label for="newPassword">New Password</label>
-				<input
-					id="newPassword"
-					type="password"
-					bind:value={newPassword}
-					placeholder="Enter new password"
-					required
-					disabled={isUpdatingPassword}
-				/>
-			</div>
-			
-			<div class="form-group">
-				<label for="confirmPassword">Confirm New Password</label>
-				<input
-					id="confirmPassword"
-					type="password"
-					bind:value={confirmPassword}
-					placeholder="Confirm new password"
-					required
-					disabled={isUpdatingPassword}
-				/>
-			</div>
+
+			<PasswordInput
+				bind:password={currentPassword}
+				isLoading={isUpdatingPassword}
+				label="Current Password"
+				elementId="currentPassword"
+				placeholder="Enter your current password"
+			/>
+
+			<PasswordInput
+				bind:password={newPassword}
+				isLoading={isUpdatingPassword}
+				label="New Password"
+				elementId="newPassword"
+				placeholder="Enter new password"
+			/>
+
+			<PasswordInput
+				bind:password={confirmPassword}
+				isLoading={isUpdatingPassword}
+				label="Confirm New Password"
+				elementId="confirmPassword"
+				placeholder="Confirm new password"
+			/>
 			
 			<button type="submit" class="update-btn danger" disabled={isUpdatingPassword}>
 				{isUpdatingPassword ? 'Updating...' : 'Change Password'}

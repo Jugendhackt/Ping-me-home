@@ -1,13 +1,12 @@
 <script lang="ts">
-	import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
-	import { auth } from '$lib/FirebaseConfig';
 	import { goto } from '$app/navigation';
+	import PasswordInput from '$lib/components/PasswordInput.svelte';
+	import { auth } from '$lib/FirebaseConfig';
+	import { signInWithEmailAndPassword } from 'firebase/auth';
 	import { onMount } from 'svelte';
-	import TogglePasswordIcon from '$lib/components/TogglePasswordIcon.svelte';
 	
 	let email = $state('');
 	let password = $state('');
-	let showPassword = $state(false);
 	let isLoading = $state(false);
 	let error = $state('');
 	
@@ -110,23 +109,13 @@
 					/>
 				</div>
 
-				<div class="form-group">
-					<label for="password">Password</label>
-					<div class="password-input-wrapper">
-						<input 
-							id="password"
-							type={showPassword ? 'text' : 'password'}
-							bind:value={password}
-							placeholder="Enter your password"
-							required
-							disabled={isLoading}
-						/>
-						<label class="toggle-password-label" for="togglePassword">
-							<TogglePasswordIcon showPassword={showPassword} />
-						</label>
-						<input type="checkbox" id="togglePassword" bind:checked={showPassword} style="display: none;" />
-					</div>
-				</div>
+				<PasswordInput
+					bind:password={password}
+					isLoading={isLoading}
+					label="Password"
+					elementId="password"
+					placeholder="Create a password"
+				/>
 
 				<button 
 					type="submit"
