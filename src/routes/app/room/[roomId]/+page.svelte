@@ -48,9 +48,9 @@
         <div class="info-item">
             <strong>URL Joining Allowed:</strong> {room.allowUrlJoining ? 'Yes' : 'No'}
             {#if room.allowUrlJoining}
-                <a aria-label="Copy join URL" class="copy-join-url-button" onclick={copyJoinUrl}>
-                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M120-220v-80h80v80h-80Zm0-140v-80h80v80h-80Zm0-140v-80h80v80h-80ZM260-80v-80h80v80h-80Zm100-160q-33 0-56.5-23.5T280-320v-480q0-33 23.5-56.5T360-880h360q33 0 56.5 23.5T800-800v480q0 33-23.5 56.5T720-240H360Zm0-80h360v-480H360v480Zm40 240v-80h80v80h-80Zm-200 0q-33 0-56.5-23.5T120-160h80v80Zm340 0v-80h80q0 33-23.5 56.5T540-80ZM120-640q0-33 23.5-56.5T200-720v80h-80Zm420 80Z"/></svg>
-                </a>
+                    <a aria-label="Copy join URL" class="copy-join-url-button" onclick={copyJoinUrl}>
+                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3" style="vertical-align: middle;"><path d="M120-220v-80h80v80h-80Zm0-140v-80h80v80h-80Zm0-140v-80h80v80h-80ZM260-80v-80h80v80h-80Zm100-160q-33 0-56.5-23.5T280-320v-480q0-33 23.5-56.5T360-880h360q33 0 56.5 23.5T800-800v480q0 33-23.5 56.5T720-240H360Zm0-80h360v-480H360v480Zm40 240v-80h80v80h-80Zm-200 0q-33 0-56.5-23.5T120-160h80v80Zm340 0v-80h80q0 33-23.5 56.5T540-80ZM120-640q0-33 23.5-56.5T200-720v80h-80Zm420 80Z"/></svg>
+                    </a>
             {/if}
         </div>
         <div class="info-item">
@@ -169,6 +169,19 @@
     .leave-room-button {
         background-color: #f44336;
         color: white;
+    }
+
+    .copy-join-url-button {
+        vertical-align: middle;
+        display: inline-flex;
+        align-items: center;
+        cursor: pointer;
+        padding: 2px 6px;
+        border-radius: 4px;
+        transition: background 0.2s;
+    }
+    .copy-join-url-button:hover {
+        background: var(--bg-primary);
     }
 </style>
 

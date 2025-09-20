@@ -62,7 +62,6 @@ export async function validateRoomApiRequest(
 
 export async function deleteRoom(roomId: string, room: Room, roomRef: DatabaseReference) {
     // TODO handle other stuff
-    // TODO loop through users and delete invites
     remove(roomRef);
     // Lösche den Raum und alle User-Room-Zuordnungen
     const updates: Record<string, any> = {};

@@ -6,7 +6,7 @@ import { db } from "$lib/FirebaseConfig";
 
 export const load: PageServerLoad = async ({ params, locals }) => {
     try {
-        const { room, user } = await validateRoomApiRequest(params.roomID, locals, {
+        const { room, user } = await validateRoomApiRequest(params.roomId, locals, {
             requiredUserRole: ['invited', 'member', 'owner']
         });
 
@@ -46,7 +46,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
         return {
             room: room,
-            roomId: params.roomID,
+            roomId: params.roomId,
             members: members,
             isOwner: room.members[user.uid] === 'owner',
         };

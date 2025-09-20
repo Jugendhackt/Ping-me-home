@@ -1,21 +1,23 @@
 import { validateRoomApiRequest } from "$lib/server/apiUtils";
-import { error } from "@sveltejs/kit";
+import { error, isRedirect, redirect } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
-import { goto } from "$app/navigation";
 
 export const load: PageServerLoad = async ({ params, locals }) => {
     try {
-        const { room, user } = await validateRoomApiRequest(params.roomID, locals);
+        const { room, user } = await validateRoomApiRequest(params.roomId, locals);
 
         if (room.members[user.uid] || !room.allowUrlJoining) {
-            return goto(`/app/room/${params.roomID}`);
+            return redirect(303, `/app/room/${params.roomId}`);
         }
 
         return {
             roomName: room.name,
-            roomId: params.roomID,
+            roomId: params.roomId,
         };
     } catch (err) {
+        if (isRedirect(err)) {
+            throw err;
+        }
         console.error('Failed to load room data:', err);
         throw error(404, 'Room not found or access denied');
     }
