@@ -41,7 +41,7 @@
 </script>
 
 <div class="avatar {sizeClass}" style="background-color: {backgroundColor}">
-	{#if profileURL}
+	{#if profileURL && URL.parse(profileURL)?.protocol?.startsWith('http')}
 		<img src={profileURL} alt="{displayName}'s avatar" class="avatar-image" />
 	{:else}
 		<span class="avatar-initials">{initials}</span>
