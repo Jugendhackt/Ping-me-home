@@ -4,6 +4,7 @@ export interface User {
   uid: string;
   email: string;
   role: string;
+  pendingInvites: string[];
 }
 
 export type RoomRole = 'invited'|'member'|'owner';

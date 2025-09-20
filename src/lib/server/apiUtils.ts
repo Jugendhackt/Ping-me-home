@@ -4,8 +4,17 @@ import { error } from "@sveltejs/kit";
 import { get, ref, remove, type DatabaseReference } from "firebase/database";
 
 interface RoomApiHandlerConfig {
-    requiredUserRole: RoomRole | undefined,
-    mustBeMember: boolean,
+    requiredUserRole: RoomRole | RoomRole[] | undefined,
+}
+
+export function requireAuthentication(locals: App.Locals): User {
+    const user = locals.user;
+
+    if (!user) {
+        throw error(401, 'Please log in to use this endpoint!')
+    }
+
+    return user;
 }
 
 export async function validateRoomApiRequest(
@@ -13,19 +22,13 @@ export async function validateRoomApiRequest(
     locals: App.Locals,
     config: Partial<RoomApiHandlerConfig> = {
         requiredUserRole: undefined,
-        mustBeMember: false,
     }
 ): Promise<{
     room: Room,
     user: User,
     roomRef: DatabaseReference,
 }>{
-    const user = locals.user;
-
-    if (!user) {
-        throw error(401, 'Please log in to use this endpoint!')
-    }
-
+    const user = requireAuthentication(locals);
 
     if (roomId === undefined) {
         throw error(400, 'Please provide a room ID!');
@@ -39,12 +42,13 @@ export async function validateRoomApiRequest(
 
     const room: Room = value.val() as Room;
 
-    if (config.requiredUserRole !== undefined && room.members[user.uid] !== config.requiredUserRole) {
-        throw error(403, `This endpoint requires the ${config.requiredUserRole} role in the room!`);
-    }
-
-    if (config.mustBeMember && !room.members[user.uid]) {
-        throw error(403, 'You are not a member of this room!');
+    const requiredRoles: RoomRole[] | undefined = config.requiredUserRole === undefined
+        ? undefined
+        : Array.isArray(config.requiredUserRole)
+            ? config.requiredUserRole
+            : [config.requiredUserRole];
+    if (requiredRoles !== undefined && room.members[user.uid] !in requiredRoles) {
+        throw error(403, `This endpoint requires one of the roles: ${requiredRoles.join(',')}`);
     }
 
     return {
@@ -57,6 +61,7 @@ export async function validateRoomApiRequest(
 export async function deleteRoom(room: Room, roomRef: DatabaseReference) {
     remove(roomRef);
     // TODO handle other stuff
+    // TODO loop through users and delete invites
 }
 
 export function generateRandomId(): string {

@@ -42,7 +42,7 @@ export const POST: RequestHandler = async ({ request }) => {
 			user: {
 				uid: user.uid,
 				email: user.email,
-				displayName: displayName.trim()
+				displayName: displayName.trim(),
 			}
 		});
 		

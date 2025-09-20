@@ -4,7 +4,7 @@ import { update } from "firebase/database";
 
 export const POST: RequestHandler = async ({ params, locals }) => {
     const { room, user, roomRef } = await validateRoomApiRequest(params.roomId, locals, {
-        mustBeMember: true,
+        requiredUserRole: ['member', 'owner'],
     });
 
     if (room.members[user.uid] === 'owner') {
