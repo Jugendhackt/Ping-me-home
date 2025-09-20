@@ -145,31 +145,6 @@
 		margin: 0;
 		color: var(--text-primary);
 	}
-
-	.main-nav {
-		display: flex;
-		align-items: center;
-		gap: 20px;
-	}
-
-	.nav-link {
-		color: var(--text-secondary);
-		text-decoration: none;
-		padding: 8px 12px;
-		border-radius: 6px;
-		font-weight: 500;
-		transition: all 0.2s ease;
-	}
-
-	.nav-link:hover {
-		color: var(--text-primary);
-		background: var(--bg-tertiary);
-	}
-
-	.nav-link:global(.active) {
-		color: var(--accent-color);
-		background: var(--accent-bg);
-	}
 	
 	.header-actions {
 		display: flex;
@@ -304,15 +279,6 @@
 		
 		.app-title {
 			font-size: 1.3rem;
-		}
-
-		.main-nav {
-			gap: 10px;
-		}
-
-		.nav-link {
-			padding: 6px 8px;
-			font-size: 0.9rem;
 		}
 		
 		.user-name {
