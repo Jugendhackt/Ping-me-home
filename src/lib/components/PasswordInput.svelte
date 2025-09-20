@@ -28,7 +28,7 @@
 					height="24px"
 					viewBox="0 -960 960 960"
 					width="24px"
-					fill="#333"
+					fill="var(--text-muted)"
 				>
 					{#if showPassword}
 						<path
