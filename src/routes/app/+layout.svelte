@@ -64,11 +64,6 @@
 		<div class="header-content">
 			<a href="/app" class="app-title" style="text-decoration: none; cursor: pointer;">Ping me Home!</a>
 			
-			<!-- Navigation -->
-			<nav class="main-nav">
-				<a href="/app" class="nav-link">Dashboard</a>
-			</nav>
-			
 			<div class="header-actions">
 				<button class="theme-toggle" onclick={toggleTheme} aria-label="Toggle theme">
 					{theme === 'light' ? '🌙' : '☀️'}
