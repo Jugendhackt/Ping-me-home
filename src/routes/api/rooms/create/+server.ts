@@ -1,9 +1,8 @@
 import { db } from "$lib/FirebaseConfig";
-import { addUserToRoom } from "$lib/stores/userRooms";
 import { generateRandomId, requireAuthentication } from "$lib/server/apiUtils";
 import type { Room } from "$lib/types";
 import { error, json, type RequestHandler } from "@sveltejs/kit";
-import { ref, set, update } from "firebase/database";
+import { ref, update } from "firebase/database";
 
 export const POST: RequestHandler = async ({ request, locals }) => {
     const user = requireAuthentication(locals);
