@@ -1,6 +1,6 @@
 import type { Room } from "$lib/types";
 import { error, json, type RequestHandler } from "@sveltejs/kit";
-import { get, getDatabase, ref, remove } from "firebase/database";
+import { get, getDatabase, ref } from "firebase/database";
 
 export const POST: RequestHandler = async ({ params, locals }) => {
     if (!locals.user) {
@@ -8,7 +8,7 @@ export const POST: RequestHandler = async ({ params, locals }) => {
     }
 
     const { roomId } = params;
-    
+
     const db = getDatabase();
     const groupRef = ref(db, `rooms/${roomId}`);
     const value = await get(groupRef);
@@ -17,13 +17,10 @@ export const POST: RequestHandler = async ({ params, locals }) => {
     }
 
     const room: Room = value.val() as Room;
-    // check permissions
-    const role = room.members[locals.user.uid];
-    if (role !== 'owner') {
-        throw error(403, 'Only the owner can delete the room!')
+    if (!room.members[locals.user.uid]) {
+        throw error(403, 'You are not a member of this room!')
     }
 
-    remove(groupRef);
-    // TODO clean up user data for this room
+    delete room.members[locals.user.uid];
     return json({ success: true });
 };
