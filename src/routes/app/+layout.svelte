@@ -98,7 +98,7 @@
 							</div>
 							<hr class="menu-divider" />
 							<button class="menu-item" onclick={goToProfile} style="gap: 5px;">
-								{@render settingsIcon()} Profile Settings
+								{@render settingsIcon('currentColor')} Profile Settings
 							</button>
 							<button class="menu-item logout-item" onclick={handleLogout} style="gap: 5px;">
 								{@render logoutIcon("var(--error-color)")} Logout

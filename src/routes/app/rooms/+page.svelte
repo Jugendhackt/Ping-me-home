@@ -188,7 +188,7 @@
 				onclick={() => viewMode = 'grid'}
 				aria-label="Grid view"
 			>
-				{@render gridViewIcon()}
+				{@render gridViewIcon('currentColor')}
 			</button>
 			<button 
 				class="view-toggle align-center"
@@ -196,7 +196,7 @@
 				onclick={() => viewMode = 'list'}
 				aria-label="List view"
 			>
-				{@render listViewIcon()}
+				{@render listViewIcon('currentColor')}
 			</button>
 		</div>
 	</div>
