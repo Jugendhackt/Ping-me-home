@@ -64,6 +64,12 @@
 		<div class="header-content">
 			<h1 class="app-title">Ping me Home!</h1>
 			
+			<!-- Navigation -->
+			<nav class="main-nav">
+				<a href="/app" class="nav-link">Dashboard</a>
+				<a href="/app/rooms" class="nav-link">Rooms</a>
+			</nav>
+			
 			<div class="header-actions">
 				<button class="theme-toggle" onclick={toggleTheme} aria-label="Toggle theme">
 					{theme === 'light' ? '🌙' : '☀️'}
@@ -144,6 +150,31 @@
 		font-weight: 700;
 		margin: 0;
 		color: var(--text-primary);
+	}
+
+	.main-nav {
+		display: flex;
+		align-items: center;
+		gap: 20px;
+	}
+
+	.nav-link {
+		color: var(--text-secondary);
+		text-decoration: none;
+		padding: 8px 12px;
+		border-radius: 6px;
+		font-weight: 500;
+		transition: all 0.2s ease;
+	}
+
+	.nav-link:hover {
+		color: var(--text-primary);
+		background: var(--bg-tertiary);
+	}
+
+	.nav-link:global(.active) {
+		color: var(--accent-color);
+		background: var(--accent-bg);
 	}
 	
 	.header-actions {
@@ -279,6 +310,15 @@
 		
 		.app-title {
 			font-size: 1.3rem;
+		}
+
+		.main-nav {
+			gap: 10px;
+		}
+
+		.nav-link {
+			padding: 6px 8px;
+			font-size: 0.9rem;
 		}
 		
 		.user-name {
