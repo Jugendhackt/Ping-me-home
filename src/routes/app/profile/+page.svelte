@@ -119,10 +119,6 @@
 			isUpdatingPassword = false;
 		}
 	}
-	
-	function goBack() {
-		goto('/app');
-	}
 </script>
 
 <svelte:head>
@@ -131,9 +127,6 @@
 
 <div class="profile-container">
 	<div class="profile-header">
-		<button class="back-btn" onclick={goBack} aria-label="Go back">
-			← Back to App
-		</button>
 		<h1>Profile Settings</h1>
 	</div>
 	
