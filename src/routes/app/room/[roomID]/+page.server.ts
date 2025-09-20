@@ -48,6 +48,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
             room: room,
             roomId: params.roomID,
             members: members,
+            isOwner: room.members[user.uid] === 'owner',
         };
     } catch (err) {
         console.error('Failed to load room data:', err);
