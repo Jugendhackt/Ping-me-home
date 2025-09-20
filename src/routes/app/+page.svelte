@@ -30,12 +30,6 @@
 						<span class="value role-badge">{data.user.role}</span>
 					</div>
 					<div class="detail-item">
-						<span class="label">Email Verified:</span>
-						<span class="value status-badge" class:verified={data.user.emailVerified} class:unverified={!data.user.emailVerified}>
-							{data.user.emailVerified ? 'Verified' : 'Not Verified'}
-						</span>
-					</div>
-					<div class="detail-item">
 						<span class="label">User ID:</span>
 						<span class="value user-id">{data.user.uid}</span>
 					</div>
