@@ -8,37 +8,37 @@ import type { RequestHandler } from './$types';
 export const POST: RequestHandler = async ({ request }) => {
 	try {
 
-		function isEmail(email) {
+		function isEmail(email: string) {
 			const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 			return regex.test(email);
-			}
+		}
 
-		function isDisplayname(displayName) {
+		function isDisplayname(displayName: string) {
 			const regex = /^[a-zA-Z0-9_]{2,16}$/;
 
 			return regex.test(displayName);
-			}
+		}
 		const { email, password, displayName } = await request.json();
 		
 
 
-		if (isEmail(email)==false) {
+		if (isEmail(email) === false) {
 			return json({ error: 'Invalid email format' }, { status: 400 });
 		}
 
-		if (isDisplayname(displayName)==false) {
+		if (isDisplayname(displayName) === false) {
 			return json({ error: 'Invalid displayName format' }, { status: 400 });
 		}
 		
 		if (!email || !password || !displayName) {
 			return json({ error: 'Email, password and display name are required' }, { status: 400 });
 		}
-		
-		if(email == password) {
+
+		if (email === password) {
 			return json({ error: 'Email and password cannot be the same' }, { status: 400 });
 		}
 
-		if(displayName == password) {
+		if (displayName === password) {
 			return json({ error: 'Display Name and password cannot be the same' }, { status: 400 });
 		}
 
