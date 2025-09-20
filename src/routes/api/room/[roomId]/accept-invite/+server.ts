@@ -4,7 +4,7 @@ import { json, type RequestHandler } from "@sveltejs/kit";
 import { ref, update } from "firebase/database";
 
 export const POST: RequestHandler = async ({ params, locals }) => {
-    const { room, user, roomRef } = await validateRoomApiRequest(params.roomId, locals, {
+    const { room, roomId, user, roomRef } = await validateRoomApiRequest(params.roomId, locals, {
         requiredUserRole: 'invited',
     });
 
@@ -15,7 +15,7 @@ export const POST: RequestHandler = async ({ params, locals }) => {
     
 
     const userRef = ref(db, `users/${user.uid}`);
-    user.pendingInvites = user.pendingInvites?.filter(invite => invite !== params.roomId) || [];
+    user.pendingInvites = user.pendingInvites?.filter(invite => invite !== roomId) || [];
     update(userRef, user);
 
     return json({ success: true });

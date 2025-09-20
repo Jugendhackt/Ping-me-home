@@ -25,9 +25,10 @@ export async function validateRoomApiRequest(
     }
 ): Promise<{
     room: Room,
+    roomId: string,
     user: User,
     roomRef: DatabaseReference,
-}>{
+}> {
     const user = requireAuthentication(locals);
 
     if (roomId === undefined) {
@@ -53,12 +54,13 @@ export async function validateRoomApiRequest(
 
     return {
         room,
+        roomId,
         user,
         roomRef,
     }
 }
 
-export async function deleteRoom(room: Room, roomRef: DatabaseReference) {
+export async function deleteRoom(roomId: string, room: Room, roomRef: DatabaseReference) {
     // TODO handle other stuff
     // TODO loop through users and delete invites
     remove(roomRef);
@@ -69,8 +71,18 @@ export async function deleteRoom(room: Room, roomRef: DatabaseReference) {
     updates[`rooms/${roomRef.key}`] = null;
     
     // Entferne den Raum aus allen User-Listen
-    Object.keys(room.members).forEach(userId => {
+    Object.keys(room.members).forEach(async userId => {
         updates[`users/${userId}/rooms/${roomRef.key}`] = null;
+        
+        if (room.members[userId] === 'invited') {
+            const pendingInvitesRef = ref(db, `users/${userId}/pendingInvites`);
+            const pendingInvitesSnapshot = await get(pendingInvitesRef);
+            if (pendingInvitesSnapshot.exists()) {
+                const pendingInvites: string[] = pendingInvitesSnapshot.val() as string[];
+                const updatedInvites = pendingInvites.filter(id => id !== roomId);
+                updates[`users/${userId}/pendingInvites`] = updatedInvites;
+            }
+        }
     });
     
     await update(ref(db), updates);

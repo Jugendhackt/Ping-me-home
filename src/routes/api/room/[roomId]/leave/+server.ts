@@ -2,13 +2,13 @@ import { deleteRoom, validateRoomApiRequest, updateRoomMembership } from "$lib/s
 import { json, type RequestHandler } from "@sveltejs/kit";
 
 export const POST: RequestHandler = async ({ params, locals }) => {
-    const { room, user, roomRef } = await validateRoomApiRequest(params.roomId, locals, {
+    const { room, roomId, user, roomRef } = await validateRoomApiRequest(params.roomId, locals, {
         requiredUserRole: ['member', 'owner'],
     });
 
     if (room.members[user.uid] === 'owner') {
         // Owner verlässt = Raum löschen
-        await deleteRoom(room, roomRef);
+        await deleteRoom(roomId, room, roomRef);
     } else {
         // Normales Member verlässt
         await updateRoomMembership(room, roomRef, {
