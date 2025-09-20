@@ -58,3 +58,13 @@ export async function deleteRoom(room: Room, roomRef: DatabaseReference) {
     remove(roomRef);
     // TODO handle other stuff
 }
+
+export function generateRandomId(): string {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    for (let i = 0; i < 16; i++) {
+        const randomIndex = Math.floor(Math.random() * chars.length);
+        result += chars[randomIndex];
+    }
+    return result;
+}
