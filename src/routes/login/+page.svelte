@@ -45,8 +45,9 @@
 				console.log('✅ Session created successfully');
 				goto('/app');
 			} else {
-				console.log('⚠️ Session creation failed, but redirecting anyway');
-				goto('/app');
+				console.error('❌ Session creation failed');
+				const responseData = await response.json();
+				error = `Session creation failed: ${responseData.error || 'Unknown error'}`;
 			}
 		} catch (err: any) {
 			console.error('❌ Login error:', err);
