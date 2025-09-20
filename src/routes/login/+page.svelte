@@ -305,25 +305,4 @@
 			font-size: 1.3rem;
 		}
 	}
-
-	.password-input-wrapper {
-		position: relative;
-		display: flex;
-		align-items: center;
-	}
-	.password-input-wrapper input[type="password"],
-	.password-input-wrapper input[type="text"] {
-		flex: 1;
-		padding-right: 40px;
-	}
-	.toggle-password-label {
-		position: absolute;
-		right: 10px;
-		top: 50%;
-		transform: translateY(-50%);
-		display: flex;
-		align-items: center;
-		cursor: pointer;
-		user-select: none;
-	}
 </style>
