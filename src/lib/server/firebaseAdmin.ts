@@ -1,13 +1,12 @@
-import admin from 'firebase-admin';
-import { 
-  FIREBASE_PROJECT_ID,
-  FIREBASE_PRIVATE_KEY_ID, 
-  FIREBASE_PRIVATE_KEY,
+import {
   FIREBASE_CLIENT_EMAIL,
   FIREBASE_CLIENT_ID,
-  FIREBASE_DATABASE_URL 
+  FIREBASE_DATABASE_URL,
+  FIREBASE_PRIVATE_KEY,
+  FIREBASE_PRIVATE_KEY_ID,
+  FIREBASE_PROJECT_ID
 } from '$env/static/private';
-import type { DatabaseReference } from 'firebase/database';
+import admin from 'firebase-admin';
 
 // Überprüfung der Umgebungsvariablen
 const requiredEnvVars = {

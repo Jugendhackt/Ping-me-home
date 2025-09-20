@@ -1,12 +1,9 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import TogglePasswordIcon from '$lib/components/TogglePasswordIcon.svelte';
-	import { onMount } from 'svelte';
+	import PasswordInput from '$lib/components/PasswordInput.svelte';
 
 	let email = $state('');
 	let password = $state('');
-	let showPassword = $state(false);
-	let showConfirmPassword = $state(false);
 	let confirmPassword = $state('');
 	let displayName = $state('');
 	let isLoading = $state(false);
@@ -19,7 +16,7 @@
 		if (!email || !password || !confirmPassword || !displayName) {
 			error = 'Please fill in all fields';
 			return;
-		}
+		} 
 
 		if (password !== confirmPassword) {
 			error = 'Passwords do not match';
@@ -119,7 +116,7 @@
 				<label for="email">Email Address</label>
 				<input
 					id="email"
-					type="email"
+					type="text"
 					bind:value={email}
 					placeholder="Enter your email"
 					required
@@ -139,41 +136,21 @@
 				/>
 			</div>
 
-			<div class="form-group">
-				<label for="password">Password</label>
-				<div class="password-input-wrapper">
-					<input
-						id="password"
-						type={showPassword ? 'text' : 'password'}
-						bind:value={password}
-						placeholder="Create a password"
-						required
-						disabled={isLoading}
-					/>
-					<label class="toggle-password-label" for="togglePassword">
-						<TogglePasswordIcon showPassword={showPassword} />
-					</label>
-					<input type="checkbox" id="togglePassword" bind:checked={showPassword} style="display: none;" />
-				</div>
-			</div>
+			<PasswordInput
+				bind:password={password}
+				isLoading={isLoading}
+				label="Password"
+				elementId="password"
+				placeholder="Create a password"
+			/>
 
-			<div class="form-group">
-				<label for="confirmPassword">Confirm Password</label>
-				<div class="password-input-wrapper">
-					<input
-						id="confirmPassword"
-						type={showConfirmPassword ? 'text' : 'password'}
-						bind:value={confirmPassword}
-						placeholder="Confirm your password"
-						required
-						disabled={isLoading}
-					/>
-					<label class="toggle-password-label" for="toggleConfirmPassword">
-						<TogglePasswordIcon showPassword={showConfirmPassword} />
-					</label>
-					<input type="checkbox" id="toggleConfirmPassword" bind:checked={showConfirmPassword} style="display: none;" />
-				</div>
-			</div>
+			<PasswordInput
+				bind:password={confirmPassword}
+				isLoading={isLoading}
+				label="Confirm Password"
+				elementId="confirmPassword"
+				placeholder="Confirm your password"
+			/>
 
 			<button type="submit" class="register-btn" disabled={isLoading}>
 				{isLoading ? 'Creating Account...' : 'Create Account'}
@@ -255,7 +232,7 @@
 		border: 1px solid #fcc;
 	}
 
-	.form-group {
+	:global(.register-container .form-group) {
 		margin-bottom: 20px;
 	}
 
@@ -352,26 +329,5 @@
 		.title {
 			font-size: 1.3rem;
 		}
-	}
-
-	.password-input-wrapper {
-		position: relative;
-		display: flex;
-		align-items: center;
-	}
-	.password-input-wrapper input[type="password"],
-	.password-input-wrapper input[type="text"] {
-		flex: 1;
-		padding-right: 40px;
-	}
-	.toggle-password-label {
-		position: absolute;
-		right: 10px;
-		top: 50%;
-		transform: translateY(-50%);
-		display: flex;
-		align-items: center;
-		cursor: pointer;
-		user-select: none;
 	}
 </style>
