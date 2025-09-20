@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { doorIcon } from '$lib/components/Icons.svelte';
+    import ProfileAvatar from '$lib/components/ProfileAvatar.svelte';
     import type { PageData } from './$types';
     
     export let data: PageData;
@@ -64,12 +66,15 @@
             {#each members as member}
                 <details class="member-item" name={member.uid}>
                     <summary>
+                        <ProfileAvatar displayName={member.displayName} profileURL={member.profileURL} />
                         <span class="member-name">{member.displayName}{#if member.role === 'owner'}
                             <svg style="vertical-align: bottom; padding-left: 5px;" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="gold"><path d="M200-160v-80h560v80H200Zm0-140-51-321q-2 0-4.5.5t-4.5.5q-25 0-42.5-17.5T80-680q0-25 17.5-42.5T140-740q25 0 42.5 17.5T200-680q0 7-1.5 13t-3.5 11l125 56 125-171q-11-8-18-21t-7-28q0-25 17.5-42.5T480-880q25 0 42.5 17.5T540-820q0 15-7 28t-18 21l125 171 125-56q-2-5-3.5-11t-1.5-13q0-25 17.5-42.5T820-740q25 0 42.5 17.5T880-680q0 25-17.5 42.5T820-620q-2 0-4.5-.5t-4.5-.5l-51 321H200Zm68-80h424l26-167-105 46-133-183-133 183-105-46 26 167Zm212 0Z"/></svg>
                         {/if}</span>
                         <span class="member-status status-{member.status}">{member.status}</span>
                     </summary>
-                    (TODO: Show details about the user's status)
+                    <div class="member-contents">
+                        (TODO: Show details about the user's status)
+                    </div>
                 </details>
             {/each}
         </div>
@@ -110,10 +115,32 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 0.5rem;
         background: var(--bg-primary);
-        border-radius: 4px;
+        border-radius: 8px;
         border: 1px solid var(--border-color);
+    }
+
+    .member-item summary {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 10px;
+        border-bottom: 1px solid var(--border-color);
+        border-radius: 8px;
+        transition: margin 150ms ease-out;
+    }
+
+    .member-item summary, .member-contents {
+        padding: 0.5rem;
+    }
+
+    .member-item summary:hover {
+        background: var(--bg-hover);
+        cursor: pointer;
+    }
+
+    details[open] summary {
+        margin-bottom: 10px;
     }
 
     .member-uid {
@@ -147,6 +174,10 @@
     h1 {
         color: var(--text-primary);
         margin-bottom: 1rem;
+        background: var(--text-gradient);
+        background-clip: text;
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
     }
 
     h2 {
@@ -184,7 +215,3 @@
         background: var(--bg-primary);
     }
 </style>
-
-{#snippet doorIcon()}
-<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M120-120v-80h80v-560q0-33 23.5-56.5T280-840h400q33 0 56.5 23.5T760-760v560h80v80H120Zm160-80h400v-560H280v560Zm120-240q17 0 28.5-11.5T440-480q0-17-11.5-28.5T400-520q-17 0-28.5 11.5T360-480q0 17 11.5 28.5T400-440ZM280-760v560-560Z"/></svg>
-{/snippet}

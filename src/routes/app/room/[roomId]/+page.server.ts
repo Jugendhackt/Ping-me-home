@@ -22,6 +22,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
             uid: string;
             displayName: string;
             role: string;
+            profileURL: string | undefined;
         }[] = [];
 
         for (const [uid, role] of Object.entries(room.members)) {
@@ -34,12 +35,14 @@ export const load: PageServerLoad = async ({ params, locals }) => {
                     uid: uid,
                     displayName: userData.displayName || 'Unknown User',
                     role: role,
+                    profileURL: userData.profileURL,
                 });
             } else {
                 members.push({
                     uid: uid,
                     displayName: 'N/A (Failed to load user data)',
                     role: role,
+                    profileURL: undefined,
                 });
             }
         }
