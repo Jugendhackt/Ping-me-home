@@ -1,13 +1,11 @@
 import { db } from "$lib/FirebaseConfig";
-import { generateRandomId } from "$lib/server/apiUtils";
+import { generateRandomId, requireAuthentication } from "$lib/server/apiUtils";
 import type { Room } from "$lib/types";
 import { error, json, type RequestHandler } from "@sveltejs/kit";
-import { ref, set } from "firebase/database";
+import { ref, update } from "firebase/database";
 
 export const POST: RequestHandler = async ({ request, locals }) => {
-    if (!locals.user) {
-        throw error(401, 'Please log in to use this endpoint!')
-    }
+    const user = requireAuthentication(locals);
     
     const { name, allowUrlJoining } = await request.json();
     if (!name) {
@@ -18,10 +16,17 @@ export const POST: RequestHandler = async ({ request, locals }) => {
     const room: Room = {
         name: name,
         members: {
-            [locals.user.uid]: 'owner',
+            [user.uid]: 'owner',
         },
         allowUrlJoining: allowUrlJoining ?? true,
     };
-    set(newRoomRef, room);
+    
+    // Create the room and add the room to the users' personal list
+    const updates: Record<string, any> = {};
+    updates[`rooms/${newRoomRef.key}`] = room;
+    updates[`users/${user.uid}/rooms/${newRoomRef.key}`] = 'owner';
+    
+    await update(ref(db), updates);
+
     return json({ success: true, key: newRoomRef.key });
 };

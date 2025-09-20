@@ -9,6 +9,7 @@ declare global {
 				email: string;
 				role: string;
 				emailVerified: boolean;
+				pendingInvites: string[];
 			} | null;
 		}
 		// interface PageData {}

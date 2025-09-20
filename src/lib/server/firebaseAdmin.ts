@@ -7,6 +7,7 @@ import {
   FIREBASE_CLIENT_ID,
   FIREBASE_DATABASE_URL 
 } from '$env/static/private';
+import type { DatabaseReference } from 'firebase/database';
 
 // Überprüfung der Umgebungsvariablen
 const requiredEnvVars = {

@@ -1,0 +1,132 @@
+<script lang="ts">
+    import type { PageData } from './$types';
+    
+    export let data: PageData;
+    
+    $: room = data.room;
+    $: roomId = data.roomId;
+    
+    // Convert members object to array for easier display
+    $: membersList = Object.entries(room.members).map(([uid, role]) => ({
+        uid,
+        role
+    }));
+</script>
+
+<div class="room-info">
+    <h1>{room.name}</h1>
+    
+    <div class="room-details">
+        <h2>Room Information</h2>
+        <div class="info-item">
+            <strong>Room ID:</strong> {roomId}
+        </div>
+        <div class="info-item">
+            <strong>URL Joining Allowed:</strong> {room.allowUrlJoining ? 'Yes' : 'No'}
+        </div>
+        <div class="info-item">
+            <strong>Total Members:</strong> {membersList.length}
+        </div>
+    </div>
+    
+    <div class="members-section">
+        <h2>Members</h2>
+        <div class="members-list">
+            {#each membersList as member}
+                <div class="member-item">
+                    <span class="member-uid">{member.uid}</span>
+                    <span class="member-role role-{member.role}">{member.role}</span>
+                </div>
+            {/each}
+        </div>
+    </div>
+    
+    <div class="raw-data">
+        <h2>Raw Room Data</h2>
+        <pre>{JSON.stringify(room, null, 2)}</pre>
+    </div>
+</div>
+
+<style>
+    .room-info {
+        padding: 2rem;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .room-details, .members-section, .raw-data {
+        margin-bottom: 2rem;
+        padding: 1rem;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background: #f9f9f9;
+    }
+    
+    .info-item {
+        margin-bottom: 0.5rem;
+    }
+    
+    .members-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .member-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem;
+        background: white;
+        border-radius: 4px;
+        border: 1px solid #eee;
+    }
+    
+    .member-uid {
+        font-family: monospace;
+        color: #666;
+    }
+    
+    .member-role {
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.875rem;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+    
+    .role-owner {
+        background: #ffd700;
+        color: #333;
+    }
+    
+    .role-member {
+        background: #4caf50;
+        color: white;
+    }
+    
+    .role-invited {
+        background: #ff9800;
+        color: white;
+    }
+    
+    pre {
+        background: #f0f0f0;
+        padding: 1rem;
+        border-radius: 4px;
+        overflow-x: auto;
+        font-family: 'Courier New', monospace;
+        font-size: 0.875rem;
+    }
+    
+    h1 {
+        color: #333;
+        margin-bottom: 1rem;
+    }
+    
+    h2 {
+        color: #555;
+        margin-bottom: 1rem;
+        font-size: 1.25rem;
+    }
+</style>

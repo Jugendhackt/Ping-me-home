@@ -1,6 +1,5 @@
-import { validateRoomApiRequest } from "$lib/server/apiUtils";
+import { validateRoomApiRequest, updateRoomMembership } from "$lib/server/apiUtils";
 import { error, json, type RequestHandler } from "@sveltejs/kit";
-import { update } from "firebase/database";
 
 export const POST: RequestHandler = async ({ params, locals, request }) => {
     const { room, roomRef } = await validateRoomApiRequest(params.roomId, locals, {
@@ -16,7 +15,10 @@ export const POST: RequestHandler = async ({ params, locals, request }) => {
         throw error(403, 'The specified user is not a member of the room!');
     }
 
-    delete room.members[userToKick];
-    update(roomRef, room);
+    // Entferne User aus dem Raum
+    await updateRoomMembership(room, roomRef, {
+        [userToKick]: null // null = entfernen
+    });
+    
     return json({ success: true });
 };
