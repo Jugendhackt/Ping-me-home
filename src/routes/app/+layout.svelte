@@ -4,7 +4,7 @@
 	import ProfileAvatar from '$lib/components/ProfileAvatar.svelte';
 	import { goto } from '$app/navigation';
 	import NavTitle from '$lib/components/NavTitle.svelte';
-	import { logoutIcon, settingsIcon } from '$lib/components/Icons.svelte';
+	import { logoutIcon, settingsIcon, inviteIcon } from '$lib/components/Icons.svelte';
 	
 	let { data, children }: { data: LayoutData, children: any } = $props();
 	let theme = $state('light');
@@ -41,6 +41,11 @@
 	function goToProfile() {
 		showUserMenu = false;
 		goto('/app/profile');
+	}
+
+	function goToInbox() {
+		showUserMenu = false;
+		goto('/app/inbox');
 	}
 	
 	async function handleLogout() {
@@ -97,6 +102,9 @@
 								</div>
 							</div>
 							<hr class="menu-divider" />
+							<button class="menu-item" onclick={goToInbox} style="gap: 5px;">
+								{@render inviteIcon('currentColor')} Inbox
+							</button>
 							<button class="menu-item" onclick={goToProfile} style="gap: 5px;">
 								{@render settingsIcon('currentColor')} Profile Settings
 							</button>

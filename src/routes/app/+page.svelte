@@ -1,12 +1,45 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import ProfileAvatar from '$lib/components/ProfileAvatar.svelte';
+	import { inboxIcon, notificationIcon, inviteIcon } from '$lib/components/Icons.svelte';
 	import { goto } from '$app/navigation';
+	import { onMount, onDestroy } from 'svelte';
+	import { db } from '$lib/FirebaseConfig';
+	import { ref, onValue, type Unsubscribe } from 'firebase/database';
+	import type { User } from '$lib/types';
 
 	let { data }: { data: PageData } = $props();
+	
+	// Reactive state for real-time updates
+	let currentUser = $state<User>(data.user);
+	let pendingInvitesCount = $state(data.user.pendingInvites?.length || 0);
+	let unsubscribe: Unsubscribe | null = null;
+
+	onMount(() => {
+		// Set up real-time listener for user data
+		const userRef = ref(db, `users/${data.user.uid}`);
+		
+		unsubscribe = onValue(userRef, (snapshot) => {
+			if (snapshot.exists()) {
+				const userData = snapshot.val() as User;
+				currentUser = userData;
+				pendingInvitesCount = userData.pendingInvites?.length || 0;
+			}
+		});
+	});
+
+	onDestroy(() => {
+		if (unsubscribe) {
+			unsubscribe();
+		}
+	});
 
 	function goToProfile() {
 		goto('/app/profile');
+	}
+
+	function goToInbox() {
+		goto('/app/inbox');
 	}
 </script>
 
@@ -20,13 +53,13 @@
 	<div class="dashboard-header">
 		<div class="welcome-content">
 			<ProfileAvatar
-				displayName={data.user.displayName || data.user.email?.split('@')[0] || 'User'}
-				profileURL={data.user.profileURL || ''}
+				displayName={currentUser.displayName || currentUser.email?.split('@')[0] || 'User'}
+				profileURL={currentUser.profileURL || ''}
 				size="large"
 			/>
 			<div class="welcome-text">
 				<h1>
-					Welcome back, {data.user.displayName || data.user.email?.split('@')[0] || 'User'}!
+					Welcome back, {currentUser.displayName || currentUser.email?.split('@')[0] || 'User'}!
 				</h1>
 				<p>Manage your profile and rooms</p>
 			</div>
@@ -91,6 +124,47 @@
 				<div class="rooms-actions">
 					<button class="primary-btn" onclick={() => goto('/app/rooms')}>
 						View Rooms
+					</button>
+				</div>
+			</div>
+		</div>
+
+		<div class="dashboard-card inbox-card">
+			<div class="card-header">
+				<h2>Inbox</h2>
+				<button class="card-action" onclick={goToInbox}>View All</button>
+			</div>
+			<div class="inbox-content">
+				<div class="inbox-summary">
+					<div class="inbox-icon">
+						{@render inviteIcon('currentColor')}
+						{#if pendingInvitesCount > 0}
+							<div class="notification-badge">{pendingInvitesCount}</div>
+						{/if}
+					</div>
+					<div class="inbox-text">
+						<span class="inbox-title">
+							{#if pendingInvitesCount > 0}
+								{pendingInvitesCount} Pending Invite{pendingInvitesCount !== 1 ? 's' : ''}
+							{:else}
+								No Pending Invites
+							{/if}
+						</span>
+						<span class="inbox-description">
+							{#if pendingInvitesCount > 0}
+								You have room invitations waiting for your response
+							{:else}
+								Your inbox is currently empty
+							{/if}
+						</span>
+					</div>
+				</div>
+				<div class="inbox-actions">
+					<button 
+						class="primary-btn {pendingInvitesCount > 0 ? 'has-invites' : ''}" 
+						onclick={goToInbox}
+					>
+						View Inbox
 					</button>
 				</div>
 			</div>
@@ -521,6 +595,125 @@
 	.primary-btn:hover {
 		transform: translateY(-2px);
 		box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+	}
+
+	/* Inbox Styles */
+	.inbox-card {
+		position: relative;
+	}
+
+	.inbox-content {
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+		position: relative;
+		z-index: 1;
+	}
+
+	.inbox-summary {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+		padding: 1.25rem;
+		background: var(--bg-tertiary);
+		border-radius: 16px;
+		border: 1px solid var(--border-color);
+		backdrop-filter: blur(10px);
+	}
+
+	.inbox-icon {
+		font-size: 1.5rem;
+		flex-shrink: 0;
+		width: 48px;
+		height: 48px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
+		border-radius: 12px;
+		color: white;
+		box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+		position: relative;
+	}
+
+	.inbox-icon :global(svg) {
+		width: 24px;
+		height: 24px;
+	}
+
+	.notification-badge {
+		position: absolute;
+		top: -6px;
+		right: -6px;
+		background: var(--error-color, #ef4444);
+		color: white;
+		border-radius: 50%;
+		width: 20px;
+		height: 20px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 0.7rem;
+		font-weight: 700;
+		border: 2px solid var(--bg-secondary);
+		animation: pulse 2s infinite;
+	}
+
+	@keyframes pulse {
+		0% {
+			transform: scale(1);
+		}
+		50% {
+			transform: scale(1.1);
+		}
+		100% {
+			transform: scale(1);
+		}
+	}
+
+	.inbox-text {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+	}
+
+	.inbox-title {
+		color: var(--text-primary);
+		font-weight: 600;
+		font-size: 0.95rem;
+	}
+
+	.inbox-description {
+		color: var(--text-secondary);
+		font-size: 0.8rem;
+		font-weight: 500;
+	}
+
+	.inbox-actions {
+		display: flex;
+		gap: 0.75rem;
+	}
+
+	.primary-btn.has-invites {
+		background: linear-gradient(135deg, var(--error-color, #ef4444) 0%, var(--error-hover, #dc2626) 100%);
+		box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		animation: glow 2s ease-in-out infinite alternate;
+	}
+
+	.primary-btn.has-invites:hover {
+		box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
+	}
+
+	@keyframes glow {
+		from {
+			box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+		}
+		to {
+			box-shadow: 0 4px 20px rgba(239, 68, 68, 0.5);
+		}
 	}
 
 	@media (max-width: 1024px) {
