@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
 	import PasswordInput from '$lib/components/PasswordInput.svelte';
 	import ProfileAvatar from '$lib/components/ProfileAvatar.svelte';
 	import type { PageData } from './$types';
@@ -277,23 +276,6 @@
 	
 	.profile-header {
 		margin-bottom: 2rem;
-	}
-	
-	.back-btn {
-		background: var(--bg-tertiary);
-		border: 1px solid var(--border-color);
-		border-radius: 6px;
-		padding: 8px 12px;
-		cursor: pointer;
-		color: var(--text-secondary);
-		font-size: 0.9rem;
-		transition: all 0.2s ease;
-		margin-bottom: 1rem;
-	}
-	
-	.back-btn:hover {
-		background: var(--bg-hover);
-		color: var(--text-primary);
 	}
 	
 	.profile-header h1 {
