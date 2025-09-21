@@ -253,7 +253,7 @@
 			<p>Change your home location password</p>
 			
 
-			<div class="form-group">
+			<div class="form-group" style="margin: 1rem 0;">
 				<label for="Address">Address</label>
 				<input
 					id="address"
@@ -264,14 +264,14 @@
 				/>
 			</div>
 			
-			
-			<button class="update-btn" onclick={handleSetCoordinates}>
-			Set home location
-			</button>
-
-			<button class="update-btn" onclick={handleSetCoordinates2}>
-			Set home location to current location
-			</button>
+			<div class="align-center" style="flex-direction: row; justify-content: flex-start; gap: 1rem;">
+				<button class="btn btn-primary" onclick={handleSetCoordinates}>
+				Set home location
+				</button>
+				<button class="btn btn-secondary" onclick={handleSetCoordinates2}>
+				Set home location to current location
+				</button>
+			</div>
 
 			{#if locationMessage}
 			<div class="success-message">{locationMessage}</div>
