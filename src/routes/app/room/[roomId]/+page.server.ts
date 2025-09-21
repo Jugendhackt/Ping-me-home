@@ -23,6 +23,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
             displayName: string;
             role: string;
             profileURL: string | undefined;
+            arrived: boolean;
         }[] = [];
 
         for (const [uid, member] of Object.entries(room.members)) {
@@ -36,6 +37,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
                     displayName: userData.displayName || 'Unknown User',
                     role: member.role,
                     profileURL: userData.profileURL,
+                    arrived: member.arrived,
                 });
             } else {
                 members.push({
@@ -43,6 +45,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
                     displayName: 'N/A (Failed to load user data)',
                     role: member.role,
                     profileURL: undefined,
+                    arrived: member.arrived,
                 });
             }
         }

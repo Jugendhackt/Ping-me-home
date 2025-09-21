@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { copyIcon, crownIcon, deleteIcon, doorIcon, kickIcon } from '$lib/components/Icons.svelte';
+	import { copyIcon, crownIcon, deleteIcon, doorIcon, houseIcon, kickIcon } from '$lib/components/Icons.svelte';
     import ProfileAvatar from '$lib/components/ProfileAvatar.svelte';
     import type { PageData } from './$types';
     
@@ -86,6 +86,26 @@
             });
         }
     };
+
+    const setArrived = (arrived: boolean) => {
+        fetch(`/api/room/${roomId}/update-arrived`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ arrived: arrived })
+        }).then(response => {
+            if (response.ok) {
+                // Update the member's arrived status in the UI
+                members = members.map(m => m.uid === user.uid ? { ...m, arrived } : m);
+            } else {
+                alert('Failed to update arrival status. Please try again.');
+            }
+        }).catch(error => {
+            console.error('Error updating arrival status:', error);
+            alert('An error occurred. Please try again.');
+        });
+    };
 </script>
 
 <div class="room-info">
@@ -122,10 +142,11 @@
                         </div>
                         <div class="align-center">
                             {#if isOwner && member.uid !== user.uid}
-                                <button class="icon-button" onclick={() => kick(member)}>
-                                    {@render kickIcon()}
-                                </button>
+                            <button class="icon-button" onclick={() => kick(member)}>
+                                {@render kickIcon()}
+                            </button>
                             {/if}
+                            <span class="member-status {member.arrived ? 'arrived' : 'not-arrived'}">{member.arrived ? '✔️' : '❌'}</span>
                         </div>
                     </summary>
                     <div class="member-contents">
@@ -138,6 +159,11 @@
     
     <div class="room-actions">
         <h2>Actions</h2>
+        {#if members.filter(m => m.uid === user.uid).arrived}
+            <button onclick={() => setArrived(false)} class="not-arrived-button">{@render houseIcon('white')}Mark as not arrived</button>
+        {:else}
+            <button onclick={() => setArrived(true)} class="arrived-button">{@render houseIcon('white')}Mark as arrived</button>
+        {/if}
         {#if isOwner}
             <button onclick={deleteRoom} class="delete-room-button">{@render deleteIcon('white')}Delete Room</button>
         {:else}
@@ -235,6 +261,16 @@
 
     .leave-room-button, .delete-room-button {
         background-color: #f44336;
+        color: white;
+    }
+
+    .arrived-button {
+        background-color: #4CAF50;
+        color: white;
+    }
+
+    .not-arrived-button {
+        background-color: #ff9800;
         color: white;
     }
 
