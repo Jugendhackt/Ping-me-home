@@ -68,42 +68,6 @@
 	</div>
 
 	<div class="dashboard-grid">
-		<div class="dashboard-card profile-card">
-			<div class="card-header">
-				<h2>Profile Information</h2>
-				<button class="card-action" onclick={goToProfile}>Edit</button>
-			</div>
-			<div class="profile-info">
-				<div class="profile-avatar-section">
-					<ProfileAvatar
-						displayName={data.user.displayName || data.user.email?.split('@')[0] || 'User'}
-						profileURL={data.user.profileURL || ''}
-						size="medium"
-					/>
-					<div class="profile-details">
-						<h3>{data.user.displayName || 'No display name set'}</h3>
-						<p>{data.user.email}</p>
-					</div>
-				</div>
-				<div class="info-grid">
-					<div class="info-item">
-						<span class="info-label">User ID</span>
-						<span class="info-value">{data.user.uid}</span>
-					</div>
-					<div class="info-item">
-						<span class="info-label">Account Role</span>
-						<span class="info-value role-badge">{data.user.role || 'user'}</span>
-					</div>
-					{#if data.user.createdAt}
-						<div class="info-item">
-							<span class="info-label">Member Since</span>
-							<span class="info-value">{new Date(data.user.createdAt).toLocaleDateString()}</span>
-						</div>
-					{/if}
-				</div>
-			</div>
-		</div>
-
 		<div class="dashboard-card">
 			<div class="card-header">
 				<h2>Rooms</h2>
