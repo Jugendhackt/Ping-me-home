@@ -123,7 +123,7 @@ export async function logRoomAction(
     roomRef: DatabaseReference,
     performerId: string,
     action: string,
-    subjectId?: string,
+    subjectId: string | null = null,
 ): Promise<void> {
     const newLogEntry: RoomLogEntry = {
         timestamp: Date.now(),

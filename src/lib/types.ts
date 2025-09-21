@@ -18,7 +18,7 @@ export type RoomMember = {
 export type RoomLogEntry = {
   timestamp: number;
   performerId: string;
-  subjectId?: string;
+  subjectId: string | null;
   action: string;
 }
 

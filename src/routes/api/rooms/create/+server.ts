@@ -25,8 +25,9 @@ export const POST: RequestHandler = async ({ request, locals }) => {
         allowUrlJoining: allowUrlJoining ?? true,
         logs: [{
             timestamp: Date.now(),
-            uid: user.uid,
-            action: 'created the room'
+            performerId: user.uid,
+            action: 'created the room',
+            subjectId: null,
         }]
     };
     

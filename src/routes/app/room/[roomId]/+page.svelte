@@ -10,6 +10,7 @@
     $: members = data.members;
     $: isOwner = data.isOwner;
     $: user = data.user;
+    $: formattedLogs = data.formattedLogs;
 
     const copyJoinUrl = () => {
         const joinUrl = `${window.location.origin}/app/room/${roomId}/join`;
@@ -169,6 +170,18 @@
         {:else}
             <button onclick={leaveRoom} class="leave-room-button">{@render doorIcon('white')}Leave Room</button>
         {/if}
+    </div>
+
+    <div class="room-logs">
+        <h2>Room Logs</h2>
+        <div class="log-list">
+            {#each formattedLogs as log}
+                <div class="log-item">
+                    <span class="log-timestamp">{log.timestamp}</span>
+                    <span class="log-user">{log.performerName}</span> <span class="log-action">{log.action}{log.subjectName ? ` ${log.subjectName}` : ''}.</span>
+                </div>
+            {/each}
+        </div>
     </div>
 </div>
 

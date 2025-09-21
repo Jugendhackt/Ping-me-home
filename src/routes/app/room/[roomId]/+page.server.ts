@@ -50,11 +50,23 @@ export const load: PageServerLoad = async ({ params, locals }) => {
             }
         }
 
+        const formattedLogs = room.logs.map(log => {
+            const performer = members.find(m => m.uid === log.performerId);
+            const subject = log.subjectId ? members.find(m => m.uid === log.subjectId) : null;
+            return {
+                timestamp: new Date(log.timestamp).toLocaleString(),
+                action: log.action,
+                performerName: performer ? performer.displayName : 'Unknown User',
+                subjectName: subject ? subject.displayName : undefined,
+            };
+        });
+
         return {
             room: room,
             roomId: params.roomId,
             members: members.sort((a, b) => a.role === 'owner' ? -1 : b.role === 'owner' ? 1 : 0),
             isOwner: room.members[user.uid].role === 'owner',
+            formattedLogs: formattedLogs.reverse(),
         };
     } catch (err) {
         console.error('Failed to load room data:', err);
