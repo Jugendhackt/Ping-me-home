@@ -9,8 +9,14 @@ export interface User {
 
 export type RoomRole = 'invited'|'member'|'owner';
 
+export type RoomMember = {
+  uid: string;
+  role: RoomRole;
+  arrived: boolean;
+}
+
 export interface Room {
   name: string;
-  members: { [uid: string]: RoomRole };
+  members: { [uid: string]: RoomMember };
   allowUrlJoining: boolean;
 }

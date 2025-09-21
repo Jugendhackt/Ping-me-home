@@ -48,7 +48,7 @@ export async function validateRoomApiRequest(
         : Array.isArray(config.requiredUserRole)
             ? config.requiredUserRole
             : [config.requiredUserRole];
-    if (requiredRoles !== undefined && (!room.members[user.uid] || !requiredRoles.includes(room.members[user.uid]))) {
+    if (requiredRoles !== undefined && (!room.members[user.uid] || !requiredRoles.includes(room.members[user.uid].role))) {
         throw error(403, `This endpoint requires one of the roles: ${requiredRoles.join(',')}`);
     }
 
@@ -72,8 +72,8 @@ export async function deleteRoom(roomId: string, room: Room, roomRef: DatabaseRe
     // Entferne den Raum aus allen User-Listen
     Object.keys(room.members).forEach(async userId => {
         updates[`users/${userId}/rooms/${roomRef.key}`] = null;
-        
-        if (room.members[userId] === 'invited') {
+
+        if (room.members[userId].role === 'invited') {
             const pendingInvitesRef = ref(db, `users/${userId}/pendingInvites`);
             const pendingInvitesSnapshot = await get(pendingInvitesRef);
             if (pendingInvitesSnapshot.exists()) {
@@ -103,7 +103,11 @@ export async function updateRoomMembership(
         if (role === null) {
             delete room.members[userId];
         } else {
-            room.members[userId] = role;
+            if (!room.members[userId]) {
+                room.members[userId] = { uid: userId, role: role, arrived: false };
+            } else {
+                room.members[userId].role = role;
+            }
         }
         updates[`users/${userId}/rooms/${roomRef.key}`] = role;
     });

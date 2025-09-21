@@ -16,7 +16,11 @@ export const POST: RequestHandler = async ({ request, locals }) => {
     const room: Room = {
         name: name,
         members: {
-            [user.uid]: 'owner',
+            [user.uid]: {
+                uid: user.uid,
+                role: 'owner',
+                arrived: false,
+            }
         },
         allowUrlJoining: allowUrlJoining ?? true,
     };

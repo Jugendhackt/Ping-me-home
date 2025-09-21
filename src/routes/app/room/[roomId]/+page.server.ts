@@ -10,7 +10,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
             requiredUserRole: ['invited', 'member', 'owner']
         });
 
-        if (room.members[user.uid] === 'invited') {
+        if (room.members[user.uid].role === 'invited') {
             return {
                 isInvited: true,
                 roomName: room.name,
@@ -25,8 +25,8 @@ export const load: PageServerLoad = async ({ params, locals }) => {
             profileURL: string | undefined;
         }[] = [];
 
-        for (const [uid, role] of Object.entries(room.members)) {
-            if (role === 'invited') continue;
+        for (const [uid, member] of Object.entries(room.members)) {
+            if (member.role === 'invited') continue;
             const userRef = ref(db, `users/${uid}`);
             const userSnap = await get(userRef);
             if (userSnap.exists()) {
@@ -34,14 +34,14 @@ export const load: PageServerLoad = async ({ params, locals }) => {
                 members.push({
                     uid: uid,
                     displayName: userData.displayName || 'Unknown User',
-                    role: role,
+                    role: member.role,
                     profileURL: userData.profileURL,
                 });
             } else {
                 members.push({
                     uid: uid,
                     displayName: 'N/A (Failed to load user data)',
-                    role: role,
+                    role: member.role,
                     profileURL: undefined,
                 });
             }
@@ -51,7 +51,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
             room: room,
             roomId: params.roomId,
             members: members.sort((a, b) => a.role === 'owner' ? -1 : b.role === 'owner' ? 1 : 0),
-            isOwner: room.members[user.uid] === 'owner',
+            isOwner: room.members[user.uid].role === 'owner',
         };
     } catch (err) {
         console.error('Failed to load room data:', err);
