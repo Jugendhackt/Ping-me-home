@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { copyIcon, crownIcon, deleteIcon, doorIcon, houseIcon, kickIcon } from '$lib/components/Icons.svelte';
+	import { addPersonIcon, copyIcon, crownIcon, deleteIcon, doorIcon, houseIcon, kickIcon } from '$lib/components/Icons.svelte';
     import ProfileAvatar from '$lib/components/ProfileAvatar.svelte';
     import type { PageData } from './$types';
     
@@ -107,6 +107,28 @@
             alert('An error occurred. Please try again.');
         });
     };
+
+    const inviteMember = () => {
+        const email = prompt('Enter the email address of the person you want to invite:');
+        if (email) {
+            fetch(`/api/room/${roomId}/invite-member`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email: email })
+            }).then(response => {
+                if (response.ok) {
+                    alert('Invitation sent successfully.');
+                } else {
+                    alert('Failed to send invitation. Please try again.');
+                }
+            }).catch(error => {
+                console.error('Error sending invitation:', error);
+                alert('An error occurred. Please try again.');
+            });
+        }
+    };
 </script>
 
 <div class="room-info">
@@ -130,7 +152,14 @@
     </div>
     
     <div class="members-section">
-        <h2>Members</h2>
+        <div class="members-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <h2>Members</h2>
+            {#if isOwner}
+                <button class="icon-button" onclick={inviteMember} title="Invite Members">
+                    {@render addPersonIcon()}
+                </button>
+            {/if}
+        </div>
         <div class="members-list">
             {#each members as member}
                 <details class="member-item" name={member.uid}>
