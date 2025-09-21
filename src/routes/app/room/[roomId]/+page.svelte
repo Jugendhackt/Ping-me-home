@@ -177,7 +177,7 @@
         <ul class="log-list">
             {#each formattedLogs as log}
                 <li class="log-item">
-                    <span class="log-timestamp">{log.timestamp}</span>
+                    <span class="log-timestamp">{log.timestamp}</span>:
                     <span class="log-user">{log.performerName}</span> <span class="log-action">{log.action}{log.subjectName ? ` ${log.subjectName}` : ''}.</span>
                 </li>
             {/each}
