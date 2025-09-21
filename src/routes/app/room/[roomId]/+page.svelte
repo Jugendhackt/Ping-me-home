@@ -190,14 +190,14 @@
     <div class="room-actions">
         <h2>Actions</h2>
         {#if members.find(m => m.uid === user.uid)?.arrived}
-            <button onclick={() => setArrived(false)} class="not-arrived-button">{@render houseIcon('currentColor')}Mark as not arrived</button>
+            <button onclick={() => setArrived(false)} class="btn btn-warning">{@render houseIcon('currentColor')}Mark as not arrived</button>
         {:else}
-            <button onclick={() => setArrived(true)} class="arrived-button">{@render houseIcon('currentColor')}Mark as arrived</button>
+            <button onclick={() => setArrived(true)} class="btn btn-success">{@render houseIcon('currentColor')}Mark as arrived</button>
         {/if}
         {#if isOwner}
-            <button onclick={deleteRoom} class="delete-room-button">{@render deleteIcon('white')}Delete Room</button>
+            <button onclick={deleteRoom} class="btn btn-danger">{@render deleteIcon('white')}Delete Room</button>
         {:else}
-            <button onclick={leaveRoom} class="leave-room-button">{@render doorIcon('white')}Leave Room</button>
+            <button onclick={leaveRoom} class="btn btn-danger">{@render doorIcon('white')}Leave Room</button>
         {/if}
     </div>
 
@@ -313,21 +313,6 @@
         cursor: pointer;
         display: flex;
         align-items: center;
-    }
-
-    .leave-room-button, .delete-room-button {
-        background-color: #f44336;
-        color: white;
-    }
-
-    .arrived-button {
-        background-color: #4CAF50;
-        color: black;
-    }
-
-    .not-arrived-button {
-        background-color: #c07300;
-        color: white;
     }
 
     .copy-join-url-button {

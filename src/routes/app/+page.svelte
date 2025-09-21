@@ -1,12 +1,12 @@
 <script lang="ts">
-	import type { PageData } from './$types';
-	import ProfileAvatar from '$lib/components/ProfileAvatar.svelte';
-	import { inboxIcon, notificationIcon, inviteIcon } from '$lib/components/Icons.svelte';
 	import { goto } from '$app/navigation';
-	import { onMount, onDestroy } from 'svelte';
+	import { inviteIcon } from '$lib/components/Icons.svelte';
+	import ProfileAvatar from '$lib/components/ProfileAvatar.svelte';
 	import { db } from '$lib/FirebaseConfig';
-	import { ref, onValue, type Unsubscribe } from 'firebase/database';
 	import type { User } from '$lib/types';
+	import { onValue, ref, type Unsubscribe } from 'firebase/database';
+	import { onDestroy, onMount } from 'svelte';
+	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
 	

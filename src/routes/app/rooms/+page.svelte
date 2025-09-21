@@ -255,13 +255,13 @@
 					</div>
 
 					<div class="room-actions">
-						<a href="/app/room/{room.roomId}" class="btn btn-secondary">
+						<button class="btn btn-secondary" type="button" onclick={() => goto(`/app/room/${room.roomId}`)}>
 							{#if room.role === 'invited'}
 								View Invite
 							{:else}
 								Enter Room
 							{/if}
-						</a>
+						</button>
 
 						{#if room.role === 'owner'}
 							<button
@@ -693,95 +693,6 @@
 		display: flex;
 		gap: 0.75rem;
 		flex-wrap: wrap;
-	}
-
-	.btn {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		gap: 0.5rem;
-		padding: 0.75rem 1.25rem;
-		border: 1px solid var(--border-color);
-		border-radius: 8px;
-		text-decoration: none;
-		font-weight: 600;
-		font-size: 0.875rem;
-		cursor: pointer;
-		transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-		background: var(--bg-tertiary);
-		color: var(--text-primary);
-		position: relative;
-		overflow: hidden;
-		min-height: 40px;
-	}
-
-	.btn::before {
-		content: '';
-		position: absolute;
-		top: 0;
-		left: -100%;
-		width: 100%;
-		height: 100%;
-		background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-		transition: left 0.5s;
-	}
-
-	.btn:hover::before {
-		left: 100%;
-	}
-
-	.btn:hover {
-		border-color: var(--border-hover);
-		background: var(--bg-hover);
-		transform: translateY(-1px);
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-	}
-
-	.btn-primary {
-		background: linear-gradient(135deg, var(--accent-color) 0%, #4338ca 100%);
-		color: white;
-		border-color: var(--accent-color);
-		box-shadow: 0 2px 4px rgba(102, 126, 234, 0.2);
-	}
-
-	.btn-primary:hover {
-		background: linear-gradient(135deg, var(--accent-hover) 0%, #3730a3 100%);
-		border-color: var(--accent-hover);
-		box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
-	}
-
-	.btn-secondary {
-		background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
-		border-color: var(--border-color);
-		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-	}
-
-	.btn-secondary:hover {
-		background: linear-gradient(135deg, var(--bg-hover) 0%, var(--bg-secondary) 100%);
-	}
-
-	.btn-danger {
-		background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-		color: white;
-		border-color: #ef4444;
-		box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
-	}
-
-	.btn-danger:hover {
-		background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
-		border-color: #dc2626;
-		box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
-	}
-
-	.btn:disabled {
-		opacity: 0.6;
-		cursor: not-allowed;
-		transform: none;
-	}
-
-	.btn:disabled:hover {
-		transform: none;
-		box-shadow: none;
 	}
 
 	.spinner {
