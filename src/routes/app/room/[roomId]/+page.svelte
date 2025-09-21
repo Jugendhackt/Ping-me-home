@@ -148,6 +148,32 @@
             isInviting = false;
         }
     };
+
+    const makeOwner = (member: {
+        uid: string,
+        displayName: string,
+    }) => {
+        if (confirm(`Do you want to make ${member.displayName} an owner? This cannot be undone.`)) {
+            fetch(`/api/room/${roomId}/make-owner`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ userToPromote: member.uid })
+            }).then(response => {
+                if (response.ok) {
+                    // Update ownership status in the UI
+                    isOwner = false;
+                    members = members!.map(m => m.uid === member.uid ? { ...m, role: 'owner' } : m);
+                } else {
+                    alert('Failed to change owner. Please try again.');
+                }
+            }).catch(error => {
+                console.error('Error changing owner:', error);
+                alert('An error occurred. Please try again.');
+            });
+        }
+    };
 </script>
 
 <div class="room-info">
@@ -228,6 +254,9 @@
                         </div>
                         <div class="align-center">
                             {#if isOwner && member.uid !== user.uid}
+                            <button class="icon-button" onclick={() => makeOwner(member)}>
+                                {@render crownIcon('gold')}
+                            </button>
                             <button class="icon-button" onclick={() => kick(member)}>
                                 {@render kickIcon()}
                             </button>

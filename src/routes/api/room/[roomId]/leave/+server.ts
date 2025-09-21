@@ -6,8 +6,11 @@ export const POST: RequestHandler = async ({ params, locals }) => {
         requiredUserRole: ['member', 'owner'],
     });
 
-    if (room.members[user.uid].role === 'owner') {
-        // Owner verlässt = Raum löschen
+    if (
+        room.members[user.uid].role === 'owner' &&
+        Object.values(room.members).filter(m => m.role === 'owner').length === 1
+    ) {
+        // Letzter owner verlässt = Raum löschen
         await deleteRoom(roomId, room, roomRef);
     } else {
         // Normales Member verlässt
