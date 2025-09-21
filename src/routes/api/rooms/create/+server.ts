@@ -16,9 +16,19 @@ export const POST: RequestHandler = async ({ request, locals }) => {
     const room: Room = {
         name: name,
         members: {
-            [user.uid]: 'owner',
+            [user.uid]: {
+                uid: user.uid,
+                role: 'owner',
+                arrived: false,
+            }
         },
         allowUrlJoining: allowUrlJoining ?? true,
+        logs: [{
+            timestamp: Date.now(),
+            performerId: user.uid,
+            action: 'created the room',
+            subjectId: null,
+        }]
     };
     
     // Create the room and add the room to the users' personal list

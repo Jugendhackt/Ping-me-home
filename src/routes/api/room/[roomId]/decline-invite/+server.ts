@@ -1,5 +1,5 @@
 import { db } from "$lib/FirebaseConfig";
-import { validateRoomApiRequest, updateRoomMembership } from "$lib/server/apiUtils";
+import { validateRoomApiRequest, updateRoomMembership, logRoomAction } from "$lib/server/apiUtils";
 import { json, type RequestHandler } from "@sveltejs/kit";
 import { ref, update } from "firebase/database";
 
@@ -12,11 +12,12 @@ export const POST: RequestHandler = async ({ params, locals }) => {
     await updateRoomMembership(room, roomRef, {
         [user.uid]: null // null = entfernen
     });
-    
 
     const userRef = ref(db, `users/${user.uid}`);
     user.pendingInvites = user.pendingInvites?.filter(invite => invite !== params.roomId) || [];
     update(userRef, user);
+
+    await logRoomAction(room, roomRef, user.uid, 'declined the invite');
 
     return json({ success: true });
 };

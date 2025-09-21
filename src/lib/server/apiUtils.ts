@@ -1,5 +1,5 @@
 import { db } from "$lib/FirebaseConfig";
-import type { Room, RoomRole, User } from "$lib/types";
+import type { Room, RoomLogEntry, RoomRole, User } from "$lib/types";
 import { error } from "@sveltejs/kit";
 import { get, ref, remove, update, type DatabaseReference } from "firebase/database";
 
@@ -48,7 +48,7 @@ export async function validateRoomApiRequest(
         : Array.isArray(config.requiredUserRole)
             ? config.requiredUserRole
             : [config.requiredUserRole];
-    if (requiredRoles !== undefined && (!room.members[user.uid] || !requiredRoles.includes(room.members[user.uid]))) {
+    if (requiredRoles !== undefined && (!room.members[user.uid] || !requiredRoles.includes(room.members[user.uid].role))) {
         throw error(403, `This endpoint requires one of the roles: ${requiredRoles.join(',')}`);
     }
 
@@ -72,8 +72,8 @@ export async function deleteRoom(roomId: string, room: Room, roomRef: DatabaseRe
     // Entferne den Raum aus allen User-Listen
     Object.keys(room.members).forEach(async userId => {
         updates[`users/${userId}/rooms/${roomRef.key}`] = null;
-        
-        if (room.members[userId] === 'invited') {
+
+        if (room.members[userId].role === 'invited') {
             const pendingInvitesRef = ref(db, `users/${userId}/pendingInvites`);
             const pendingInvitesSnapshot = await get(pendingInvitesRef);
             if (pendingInvitesSnapshot.exists()) {
@@ -99,21 +99,42 @@ export async function updateRoomMembership(
     
     // Aktualisiere Room-Members
     Object.entries(membershipChanges).forEach(([userId, role]) => {
+        room.members = room.members || {};
         if (role === null) {
-            room.members = room.members || {};
             delete room.members[userId];
-            updates[`users/${userId}/rooms/${roomRef.key}`] = null;
         } else {
-            room.members = room.members || {};
-            room.members[userId] = role;
-            updates[`users/${userId}/rooms/${roomRef.key}`] = role;
+            if (!room.members[userId]) {
+                room.members[userId] = { uid: userId, role: role, arrived: false };
+            } else {
+                room.members[userId].role = role;
+            }
         }
+        updates[`users/${userId}/rooms/${roomRef.key}`] = role;
     });
     
     // Update das Room-Object
     updates[`rooms/${roomRef.key}`] = room;
     
     await update(ref(db), updates);
+}
+
+export async function logRoomAction(
+    room: Room,
+    roomRef: DatabaseReference,
+    performerId: string,
+    action: string,
+    subjectId: string | null = null,
+): Promise<void> {
+    const newLogEntry: RoomLogEntry = {
+        timestamp: Date.now(),
+        performerId,
+        action,
+        subjectId,
+    };
+
+    const updatedLogs = room.logs ? [...room.logs, newLogEntry] : [newLogEntry];
+
+    await update(roomRef, { logs: updatedLogs });
 }
 
 export function generateRandomId(): string {
