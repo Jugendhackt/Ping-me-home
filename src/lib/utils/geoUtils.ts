@@ -158,5 +158,25 @@ export class CoordinateService {
         message = 'Standort ungültig.';
         return { coords: null, message };
     }
-}
 
+  static async distanceToHome(): Promise<number | null> {
+    const homeCoordinates = this.getSavedCoordinates();
+    const currentCoordinates = await this.getCurrentPosition();
+    if (homeCoordinates && currentCoordinates) {
+      const R = 6371000; // Erdradius in Metern
+      const toRad = (deg: number) => (deg * Math.PI) / 180;
+
+      const dLat = toRad(currentCoordinates.lat - homeCoordinates.lat);
+      const dLng = toRad(currentCoordinates.lng - homeCoordinates.lng);
+
+      const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(toRad(homeCoordinates.lat)) * Math.cos(toRad(currentCoordinates.lat)) *
+          Math.sin(dLng / 2) * Math.sin(dLng / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+      return R * c; // Abstand in Metern
+    }
+    return null;
+  }
+}
