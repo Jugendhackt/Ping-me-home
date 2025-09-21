@@ -36,6 +36,10 @@ export const POST: RequestHandler = async ({ params, locals, request }) => {
         userToAdd = foundUid;
     }
 
+    if (userToAdd === user.uid) {
+        throw error(400, 'You can\'t invite yourself!');
+    }
+
     const userToAddSnapshot = await get(userToAddRef);
     if (!userToAddSnapshot.exists()) {
         throw error(400, 'The specified user doesn\'t exist!');
