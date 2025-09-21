@@ -8,7 +8,7 @@ export const POST: RequestHandler = async ({ params, locals, request }) => {
     });
     
     const { arrived } = await request.json();
-    if (!arrived) {
+    if (arrived === undefined) {
         throw error(400, 'Missing arrived');
     }
 
