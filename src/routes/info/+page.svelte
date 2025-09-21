@@ -3,8 +3,8 @@
 </script>
 
 <svelte:head>
-	<title>Info - SafeHome</title>
-	<meta name="description" content="Informationen zur SafeHome App">
+	<title>Info - Ping Me Home</title>
+	<meta name="description" content="Informationen zur Ping Me Home App">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 </svelte:head>
 
@@ -20,7 +20,7 @@
 
 		<div class="info-content">
 			<p>
-				Willkommen bei <strong>SafeHome</strong>! Mit dieser App kannst du sicherstellen, dass deine Freunde nach einem Treffen gut nach Hause gekommen sind.
+				Willkommen bei <strong>Ping Me Home</strong>! Mit dieser App kannst du sicherstellen, dass deine Freunde nach einem Treffen gut nach Hause gekommen sind.
 			</p>
 
 			<h2>So funktioniert es:</h2>
