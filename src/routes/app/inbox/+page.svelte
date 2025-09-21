@@ -42,7 +42,7 @@
 								
 								// Find the owner of the room
 								const ownerUid = Object.keys(room.members).find(
-									uid => room.members[uid] === 'owner'
+									uid => room.members[uid].role === 'owner'
 								);
 								
 								let ownerData = null;
