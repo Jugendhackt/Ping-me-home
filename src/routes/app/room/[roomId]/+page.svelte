@@ -2,6 +2,7 @@
 	import { addPersonIcon, copyIcon, crownIcon, deleteIcon, doorIcon, houseIcon, kickIcon } from '$lib/components/Icons.svelte';
 	import ProfileAvatar from '$lib/components/ProfileAvatar.svelte';
     import { onMount, onDestroy } from 'svelte';
+    import { slide } from 'svelte/transition';
     import { db } from '$lib/FirebaseConfig';
     import { ref, onValue, get, type Unsubscribe } from 'firebase/database';
     import type { Room } from '$lib/types';
@@ -119,6 +120,9 @@
     let isInviting = $state(false);
     let inviteError = $state('');
     let inviteErrorColor = $state('red');
+    
+    // Room history visibility state
+    let showRoomHistory = $state(false);
 
     const openInviteModal = () => {
         inviteEmail = '';
@@ -182,6 +186,21 @@
                 alert('An error occurred. Please try again.');
             });
         }
+    };
+
+    const toggleRoomHistory = () => {
+        showRoomHistory = !showRoomHistory;
+    };
+
+    // Get icon for different log actions
+    const getActionIcon = (action: string) => {
+        if (action.includes('joined') || action.includes('accepted')) return '✅';
+        if (action.includes('left') || action.includes('declined')) return '👋';
+        if (action.includes('kicked')) return '🚫';
+        if (action.includes('owner')) return '👑';
+        if (action.includes('arrived')) return '🏠';
+        if (action.includes('created')) return '🎉';
+        return '📝';
     };
 
     // Real-time room data listener
@@ -422,16 +441,41 @@
         {/if}
     </div>
 
-    <div class="room-logs">
-        <h2>Room Logs</h2>
-        <ul class="log-list">
-            {#each formattedLogs as log}
-                <li class="log-item">
-                    <span class="log-timestamp">{log.timestamp}</span>:
-                    <span class="log-user">{log.performerName}</span> <span class="log-action">{log.action}{log.subjectName ? ` ${log.subjectName}` : ''}.</span>
-                </li>
-            {/each}
-        </ul>
+    <div class="room-history-section">
+        <div class="history-header">
+            <h2>Room Activity</h2>
+            <button class="history-toggle-btn" onclick={toggleRoomHistory} class:active={showRoomHistory}>
+                {showRoomHistory ? '🔽 Hide Activity' : '📊 Show Activity'}
+            </button>
+        </div>
+        {#if showRoomHistory}
+            <div class="room-history" transition:slide>
+                <div class="history-timeline">
+                    {#each formattedLogs as log, index}
+                        <div class="timeline-item">
+                            <div class="timeline-icon">
+                                {getActionIcon(log.action)}
+                            </div>
+                            <div class="timeline-content">
+                                <div class="timeline-header">
+                                    <span class="timeline-user">{log.performerName}</span>
+                                    <span class="timeline-timestamp">{log.timestamp}</span>
+                                </div>
+                                <div class="timeline-action">
+                                    {log.action}{log.subjectName ? ` ${log.subjectName}` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    {/each}
+                    {#if formattedLogs.length === 0}
+                        <div class="timeline-empty">
+                            <span class="empty-icon">📝</span>
+                            <p>No activity yet in this room</p>
+                        </div>
+                    {/if}
+                </div>
+            </div>
+        {/if}
     </div>
     {:else}
     <div class="loading-state">
@@ -563,7 +607,7 @@
         margin: 0 auto;
     }
 
-    .room-details, .members-section, .room-actions, .room-logs {
+    .room-details, .members-section, .room-actions, .room-history-section {
         margin-bottom: 1rem;
         padding: 1rem;
         border: 1px solid var(--border-color);
@@ -571,14 +615,144 @@
         background: var(--bg-secondary);
     }
 
-    .room-logs {
-        font-family: 'Courier New', Courier, monospace;
-        max-height: 250px;
+    .room-history-section {
+        overflow: hidden;
+    }
+
+    .history-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .history-header h2 {
+        margin: 0;
+    }
+
+    .history-toggle-btn {
+        background: var(--accent-color);
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .history-toggle-btn:hover {
+        background: var(--accent-hover);
+        transform: translateY(-1px);
+    }
+
+    .history-toggle-btn.active {
+        background: var(--success-color, #22c55e);
+    }
+
+    .room-history {
+        background: var(--bg-primary);
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        max-height: 400px;
         overflow-y: auto;
     }
 
-    .log-item {
-        margin-left: 1rem;
+    .history-timeline {
+        padding: 1rem;
+    }
+
+    .timeline-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        position: relative;
+    }
+
+    .timeline-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .timeline-item:not(:last-child)::after {
+        content: '';
+        position: absolute;
+        left: 1.25rem;
+        top: 2.5rem;
+        bottom: -1.5rem;
+        width: 2px;
+        background: var(--border-color);
+    }
+
+    .timeline-icon {
+        flex-shrink: 0;
+        width: 2.5rem;
+        height: 2.5rem;
+        background: var(--bg-secondary);
+        border: 2px solid var(--border-color);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .timeline-content {
+        flex: 1;
+        background: var(--bg-secondary);
+        padding: 1rem;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+    }
+
+    .timeline-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .timeline-user {
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 0.9rem;
+    }
+
+    .timeline-timestamp {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        background: var(--bg-primary);
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+    }
+
+    .timeline-action {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        line-height: 1.4;
+    }
+
+    .timeline-empty {
+        text-align: center;
+        padding: 2rem;
+        color: var(--text-muted);
+    }
+
+    .timeline-empty .empty-icon {
+        font-size: 2rem;
+        display: block;
+        margin-bottom: 0.5rem;
+    }
+
+    .timeline-empty p {
+        margin: 0;
+        font-style: italic;
     }
 
     .info-item {
@@ -720,6 +894,27 @@
 
         .room-actions button span {
             display: none;
+        }
+
+        .history-header {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 0.5rem;
+        }
+
+        .history-toggle-btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .timeline-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.25rem;
+        }
+
+        .timeline-timestamp {
+            align-self: flex-end;
         }
     }
 </style>
