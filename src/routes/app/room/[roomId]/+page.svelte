@@ -561,6 +561,7 @@
             margin-bottom: 0.5rem;
             pointer-events: all;
             margin: unset;
+            box-shadow: var(--shadow-lg);
         }
 
         .room-actions button span {
