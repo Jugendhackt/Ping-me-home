@@ -1,7 +1,7 @@
 import { db } from '$lib/FirebaseConfig';
 import { error, json, type RequestHandler } from '@sveltejs/kit';
 import { ref, update } from 'firebase/database';
-import { validateRoomApiRequest, updateRoomMembership } from '$lib/server/apiUtils';
+import { validateRoomApiRequest, updateRoomMembership, logRoomAction } from '$lib/server/apiUtils';
 
 export const POST: RequestHandler = async ({ params, locals }) => {
 	const { room, user, roomRef } = await validateRoomApiRequest(params.roomId, locals);
@@ -25,5 +25,7 @@ export const POST: RequestHandler = async ({ params, locals }) => {
 	await updateRoomMembership(room, roomRef, {
 		[user.uid]: 'member'
 	});
+	await logRoomAction(room, roomRef, user.uid, 'joined the room through URL');
+
 	return json({ success: true });
 };

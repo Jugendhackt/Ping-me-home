@@ -1,4 +1,4 @@
-import { deleteRoom, validateRoomApiRequest, updateRoomMembership } from "$lib/server/apiUtils";
+import { deleteRoom, validateRoomApiRequest, updateRoomMembership, logRoomAction } from "$lib/server/apiUtils";
 import { json, type RequestHandler } from "@sveltejs/kit";
 
 export const POST: RequestHandler = async ({ params, locals }) => {
@@ -15,6 +15,8 @@ export const POST: RequestHandler = async ({ params, locals }) => {
             [user.uid]: null // null = entfernen
         });
     }
+
+    await logRoomAction(room, roomRef, user.uid, 'left the room');
 
     return json({ success: true });
 };

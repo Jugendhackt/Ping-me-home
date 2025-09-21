@@ -248,6 +248,12 @@
         font-size: 1.25rem;
     }
 
+    .room-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
     .room-actions button {
         display: block;
         padding: 0.5rem;

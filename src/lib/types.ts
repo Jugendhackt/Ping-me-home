@@ -15,8 +15,16 @@ export type RoomMember = {
   arrived: boolean;
 }
 
+export type RoomLogEntry = {
+  timestamp: number;
+  performerId: string;
+  subjectId?: string;
+  action: string;
+}
+
 export interface Room {
   name: string;
   members: { [uid: string]: RoomMember };
   allowUrlJoining: boolean;
+  logs: RoomLogEntry[];
 }

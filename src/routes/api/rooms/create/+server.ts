@@ -23,6 +23,11 @@ export const POST: RequestHandler = async ({ request, locals }) => {
             }
         },
         allowUrlJoining: allowUrlJoining ?? true,
+        logs: [{
+            timestamp: Date.now(),
+            uid: user.uid,
+            action: 'created the room'
+        }]
     };
     
     // Create the room and add the room to the users' personal list

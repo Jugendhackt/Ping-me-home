@@ -1,11 +1,11 @@
 import { db } from "$lib/FirebaseConfig";
-import { validateRoomApiRequest, updateRoomMembership } from "$lib/server/apiUtils";
+import { validateRoomApiRequest, updateRoomMembership, logRoomAction } from "$lib/server/apiUtils";
 import type { User } from "$lib/types";
 import { error, json, type RequestHandler } from "@sveltejs/kit";
 import { get, ref, update } from "firebase/database";
 
 export const POST: RequestHandler = async ({ params, locals, request }) => {
-    const { room, roomRef } = await validateRoomApiRequest(params.roomId, locals, {
+    const { room, roomRef, user } = await validateRoomApiRequest(params.roomId, locals, {
         requiredUserRole: 'owner',
     });
 
@@ -30,11 +30,12 @@ export const POST: RequestHandler = async ({ params, locals, request }) => {
         [userToAdd]: 'invited'
     });
     
-    
     const pendingInvites = Array.isArray(userToAddData.pendingInvites)
         ? [...userToAddData.pendingInvites, params.roomId!]
         : [params.roomId!];
     await update(userToAddRef, { pendingInvites });
+
+    await logRoomAction(room, roomRef, user.uid, `invited`, userToAdd);
 
     return json({ success: true });
 };

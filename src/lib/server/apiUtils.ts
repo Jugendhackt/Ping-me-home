@@ -1,5 +1,5 @@
 import { db } from "$lib/FirebaseConfig";
-import type { Room, RoomRole, User } from "$lib/types";
+import type { Room, RoomLogEntry, RoomRole, User } from "$lib/types";
 import { error } from "@sveltejs/kit";
 import { get, ref, remove, update, type DatabaseReference } from "firebase/database";
 
@@ -116,6 +116,25 @@ export async function updateRoomMembership(
     updates[`rooms/${roomRef.key}`] = room;
     
     await update(ref(db), updates);
+}
+
+export async function logRoomAction(
+    room: Room,
+    roomRef: DatabaseReference,
+    performerId: string,
+    action: string,
+    subjectId?: string,
+): Promise<void> {
+    const newLogEntry: RoomLogEntry = {
+        timestamp: Date.now(),
+        performerId,
+        action,
+        subjectId,
+    };
+
+    const updatedLogs = room.logs ? [...room.logs, newLogEntry] : [newLogEntry];
+
+    await update(roomRef, { logs: updatedLogs });
 }
 
 export function generateRandomId(): string {
