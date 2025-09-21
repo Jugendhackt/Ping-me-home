@@ -1,5 +1,6 @@
 <script lang="ts">
-	import PasswordInput from '$lib/components/PasswordInput.svelte';
+	import HoverTime from '$lib/components/HoverTime.svelte';
+import PasswordInput from '$lib/components/PasswordInput.svelte';
 	import ProfileAvatar from '$lib/components/ProfileAvatar.svelte';
 	import { CoordinateService } from '$lib/utils/geoUtils';
 	import type { PageData } from './$types';
@@ -304,14 +305,14 @@
 			<div class="info-item">
 				<span class="info-label">Account Created</span>
 				<div class="info-value">
-					{data.user.createdAt ? new Date(data.user.createdAt).toLocaleDateString() : 'Unknown'}
+					<HoverTime timestamp={data.user.createdAt} />
 				</div>
 			</div>
 			
 			<div class="info-item">
 				<span class="info-label">Last Updated</span>
 				<div class="info-value">
-					{data.user.updatedAt ? new Date(data.user.updatedAt).toLocaleDateString() : 'Unknown'}
+					<HoverTime timestamp={data.user.updatedAt} />
 				</div>
 			</div>
 		</div>

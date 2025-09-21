@@ -149,7 +149,7 @@
 					<div class="activity-text">
 						<span class="activity-title">Account Created</span>
 						<span class="activity-time">
-							<HoverTime timestamp={data.user.createdAt} />
+							<HoverTime timestamp={data.user.createdAt} fallback="Unknown" />
 						</span>
 					</div>
 				</div>
@@ -163,7 +163,7 @@
 						</div>
 						<div class="activity-text">
 							<span class="activity-title">Profile Updated</span>
-							<span class="activity-time"><HoverTime timestamp={data.user.updatedAt} /></span>
+							<span class="activity-time"><HoverTime timestamp={data.user.updatedAt} fallback="Unknown" /></span>
 						</div>
 					</div>
 				{/if}
