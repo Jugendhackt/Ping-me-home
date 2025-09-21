@@ -366,6 +366,7 @@ button {
   cursor: pointer;
   transition: background 0.2s, box-shadow 0.2s;
   color: var(--text-primary);
+  border: 1px solid transparent;
 }
 
 .icon-button:hover,

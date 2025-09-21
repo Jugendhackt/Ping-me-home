@@ -13,10 +13,10 @@
     let { room: initialRoom, roomId, members: initialMembers, isOwner: initialIsOwner, user, formattedLogs: initialFormattedLogs } = $derived(data);
     
     // Reactive state for real-time updates
-    let room = $state<Room | null>(initialRoom);
-    let members = $state(initialMembers || []);
-    let isOwner = $state(initialIsOwner || false);
-    let formattedLogs = $state(initialFormattedLogs || []);
+    let room = $derived<Room | null>(initialRoom || null);
+    let members = $derived(initialMembers || []);
+    let isOwner = $derived(initialIsOwner || false);
+    let formattedLogs = $derived(initialFormattedLogs || []);
     
     let roomUnsubscribe: Unsubscribe | null = null;
 
@@ -127,6 +127,7 @@
     const openInviteModal = () => {
         inviteEmail = '';
         showInviteModal = true;
+        inviteError = '';
     };
 
     const closeInviteModal = () => {
@@ -420,7 +421,7 @@
                         </div>
                     </summary>
                     <div class="member-contents">
-                        (TODO: Show details about the user's status)
+                        <!-- TODO -->
                     </div>
                 </details>
             {/each}
