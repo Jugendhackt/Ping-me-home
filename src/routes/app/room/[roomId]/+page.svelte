@@ -5,12 +5,12 @@
     
     export let data: PageData;
     
-    $: room = data.room;
+    $: room = data.room!;
     $: roomId = data.roomId;
-    $: members = data.members;
+    $: members = data.members!;
     $: isOwner = data.isOwner;
     $: user = data.user;
-    $: formattedLogs = data.formattedLogs;
+    $: formattedLogs = data.formattedLogs!;
 
     const copyJoinUrl = () => {
         const joinUrl = `${window.location.origin}/app/room/${roomId}/join`;
