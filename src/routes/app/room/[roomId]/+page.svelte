@@ -317,7 +317,7 @@
     <div class="room-details">
         <h2>Room Information</h2>
         <div class="info-item">
-            <strong>Room ID:</strong> {roomId}
+            <strong>Room ID:</strong> <code>{roomId}</code>
         </div>
         <div class="info-item">
             <strong>URL Joining Allowed:</strong> {room.allowUrlJoining ? 'Yes' : 'No'}
@@ -411,14 +411,14 @@
     <div class="room-actions">
         <h2>Actions</h2>
         {#if members.find(m => m.uid === user.uid)?.arrived}
-            <button onclick={() => setArrived(false)} class="btn btn-warning">{@render houseIcon('currentColor')}Mark as not arrived</button>
+            <button onclick={() => setArrived(false)} class="btn btn-warning">{@render houseIcon('currentColor')}<span>Mark as not arrived</span></button>
         {:else}
-            <button onclick={() => setArrived(true)} class="btn btn-success">{@render houseIcon('currentColor')}Mark as arrived</button>
+            <button onclick={() => setArrived(true)} class="btn btn-success">{@render houseIcon('currentColor')}<span>Mark as arrived</span></button>
         {/if}
         {#if isOwner}
-            <button onclick={deleteRoom} class="btn btn-danger">{@render deleteIcon('white')}Delete Room</button>
+            <button onclick={deleteRoom} class="btn btn-danger">{@render deleteIcon('white')}<span>Delete Room</span></button>
         {:else}
-            <button onclick={leaveRoom} class="btn btn-danger">{@render doorIcon('white')}Leave Room</button>
+            <button onclick={leaveRoom} class="btn btn-danger">{@render doorIcon('white')}<span>Leave Room</span></button>
         {/if}
     </div>
 
@@ -584,6 +584,13 @@
     .info-item {
         margin-bottom: 0.5rem;
     }
+    
+    .info-item code {
+        background: var(--bg-primary);
+        padding: 2px 4px;
+        border-radius: 4px;
+        font-family: 'Courier New', Courier, monospace;
+    }
 
     .members-list {
         display: flex;
@@ -677,5 +684,42 @@
         text-align: center;
         padding: 2rem;
         color: var(--text-secondary);
+    }
+
+    @media (max-width: 600px) {
+        .room-actions {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 100;
+            background: transparent;
+            pointer-events: none;
+            box-shadow: none;
+            border-top: none;
+            border-color: transparent;
+            margin-bottom: 0;
+            width: 100vw;
+            max-width: 100vw;
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .room-actions h2 {
+            display: none;
+        }
+
+        .room-actions button {
+            margin-bottom: 0.5rem;
+            pointer-events: all;
+            margin: unset;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .room-actions button span {
+            display: none;
+        }
     }
 </style>
