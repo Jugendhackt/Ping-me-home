@@ -2,11 +2,24 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { gridViewIcon, listViewIcon, searchIcon } from '$lib/components/Icons.svelte';
+
+	import { onMount } from 'svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
 
 	let viewMode = $state<'grid' | 'list'>('grid');
+
+	onMount(() => {
+		const saved = localStorage.getItem('viewMode');
+		if (saved === 'grid' || saved === 'list') {
+			viewMode = saved;
+		}
+	});
+
+	$effect(() => {
+		localStorage.setItem('viewMode', viewMode);
+	});
 	let deletingRoomId: string | null = $state(null);
 	let searchQuery = $state('');
 
