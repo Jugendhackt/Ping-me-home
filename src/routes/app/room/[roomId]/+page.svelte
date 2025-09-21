@@ -1,10 +1,23 @@
 <script lang="ts">
 	import { addPersonIcon, copyIcon, crownIcon, deleteIcon, doorIcon, houseIcon, kickIcon } from '$lib/components/Icons.svelte';
 	import ProfileAvatar from '$lib/components/ProfileAvatar.svelte';
+    import { onMount, onDestroy } from 'svelte';
+    import { db } from '$lib/FirebaseConfig';
+    import { ref, onValue, get, type Unsubscribe } from 'firebase/database';
+    import type { Room } from '$lib/types';
     
     const { data } = $props();
 
-    let { room, roomId, members, isOwner, user, formattedLogs } = $derived(data);
+    // Initial data from server load
+    let { room: initialRoom, roomId, members: initialMembers, isOwner: initialIsOwner, user, formattedLogs: initialFormattedLogs } = $derived(data);
+    
+    // Reactive state for real-time updates
+    let room = $state<Room | null>(initialRoom);
+    let members = $state(initialMembers || []);
+    let isOwner = $state(initialIsOwner || false);
+    let formattedLogs = $state(initialFormattedLogs || []);
+    
+    let roomUnsubscribe: Unsubscribe | null = null;
 
     const copyJoinUrl = () => {
         const joinUrl = `${window.location.origin}/app/room/${roomId}/join`;
@@ -70,8 +83,7 @@
                 body: JSON.stringify({ userToKick: member.uid })
             }).then(response => {
                 if (response.ok) {
-                    // Remove the kicked member from the UI
-                    members = members!.filter((m: { uid: string }) => m.uid !== member.uid);
+                    // Real-time listener will handle UI updates automatically
                 } else {
                     alert('Failed to kick member. Please try again.');
                 }
@@ -91,8 +103,7 @@
             body: JSON.stringify({ arrived: arrived })
         }).then(response => {
             if (response.ok) {
-                // Update the member's arrived status in the UI
-                members = members!.map(m => m.uid === user.uid ? { ...m, arrived } : m);
+                // Real-time listener will handle UI updates automatically
             } else {
                 alert('Failed to update arrival status. Please try again.');
             }
@@ -162,9 +173,7 @@
                 body: JSON.stringify({ userToPromote: member.uid })
             }).then(response => {
                 if (response.ok) {
-                    // Update ownership status in the UI
-                    isOwner = false;
-                    members = members!.map(m => m.uid === member.uid ? { ...m, role: 'owner' } : m);
+                    // Real-time listener will handle UI updates automatically
                 } else {
                     alert('Failed to change owner. Please try again.');
                 }
@@ -174,25 +183,152 @@
             });
         }
     };
+
+    // Real-time room data listener
+    const setupRealtimeListener = () => {
+        if (!roomId || !user) return;
+        
+        const roomRef = ref(db, `rooms/${roomId}`);
+        roomUnsubscribe = onValue(roomRef, async (snapshot) => {
+            if (!snapshot.exists()) {
+                // Room was deleted, redirect to rooms page
+                window.location.href = '/app/rooms';
+                return;
+            }
+            
+            const roomData = snapshot.val() as Room;
+            room = roomData;
+            
+            // Check if user is still a member
+            if (!roomData.members[user.uid] || roomData.members[user.uid].role === 'invited') {
+                // Handle invited users or users no longer in room
+                if (roomData.members[user.uid]?.role === 'invited') {
+                    // User is invited but hasn't joined yet, keep initial data
+                    return;
+                }
+                // User is no longer a member, redirect
+                window.location.href = '/app/rooms';
+                return;
+            }
+            
+            // Update owner status
+            isOwner = roomData.members[user.uid].role === 'owner';
+            
+            // Update members list with user details
+            const updatedMembers: {
+                uid: string;
+                displayName: string;
+                role: string;
+                profileURL: string | undefined;
+                arrived: boolean;
+            }[] = [];
+
+            for (const [uid, member] of Object.entries(roomData.members)) {
+                if (member.role === 'invited') continue;
+                try {
+                    const userRef = ref(db, `users/${uid}`);
+                    const userSnap = await get(userRef);
+                    if (userSnap.exists()) {
+                        const userData = userSnap.val();
+                        updatedMembers.push({
+                            uid: uid,
+                            displayName: userData.displayName || 'Unknown User',
+                            role: member.role,
+                            profileURL: userData.profileURL,
+                            arrived: member.arrived,
+                        });
+                    } else {
+                        updatedMembers.push({
+                            uid: uid,
+                            displayName: 'N/A (Failed to load user data)',
+                            role: member.role,
+                            profileURL: undefined,
+                            arrived: member.arrived,
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error loading user data for', uid, ':', error);
+                    updatedMembers.push({
+                        uid: uid,
+                        displayName: 'Error loading user',
+                        role: member.role,
+                        profileURL: undefined,
+                        arrived: member.arrived,
+                    });
+                }
+            }
+            
+            // Sort members with owner first
+            members = updatedMembers.sort((a, b) => a.role === 'owner' ? -1 : b.role === 'owner' ? 1 : 0);
+            
+            // Update formatted logs
+            try {
+                const updatedLogs = await Promise.all(roomData.logs.map(async log => {
+                    const performer = updatedMembers.find(m => m.uid === log.performerId);
+                    // get subject name, try to get from members first, then fallback to user data
+                    const subject = log.subjectId ? updatedMembers.find(m => m.uid === log.subjectId) : null;
+                    let subjectName = subject ? subject.displayName : null;
+                    if (!subjectName && log.subjectId) {
+                        try {
+                            const subjectRef = ref(db, `users/${log.subjectId}`);
+                            const subjectSnap = await get(subjectRef);
+                            if (subjectSnap.exists()) {
+                                const subjectData = subjectSnap.val();
+                                subjectName = subjectData.displayName || 'Unknown User';
+                            } else {
+                                subjectName = 'N/A (Failed to load user data)';
+                            }
+                        } catch (error) {
+                            subjectName = 'Error loading user';
+                        }
+                    }
+                    return {
+                        timestamp: new Date(log.timestamp).toLocaleString(),
+                        action: log.action,
+                        performerName: performer ? performer.displayName : 'Unknown User',
+                        subjectName: subjectName,
+                    };
+                }));
+                formattedLogs = updatedLogs.reverse();
+            } catch (error) {
+                console.error('Error updating logs:', error);
+            }
+        }, (error) => {
+            console.error('Firebase listener error:', error);
+            // Optionally show user feedback
+        });
+    };
+
+    // Setup and cleanup
+    onMount(() => {
+        setupRealtimeListener();
+    });
+
+    onDestroy(() => {
+        if (roomUnsubscribe) {
+            roomUnsubscribe();
+        }
+    });
 </script>
 
 <div class="room-info">
-    <h1>{room!.name}</h1>
+    <h1>{room?.name ?? 'Loading...'}</h1>
+    {#if room}
     <div class="room-details">
         <h2>Room Information</h2>
         <div class="info-item">
             <strong>Room ID:</strong> {roomId}
         </div>
         <div class="info-item">
-            <strong>URL Joining Allowed:</strong> {room!.allowUrlJoining ? 'Yes' : 'No'}
-            {#if room!.allowUrlJoining}
+            <strong>URL Joining Allowed:</strong> {room.allowUrlJoining ? 'Yes' : 'No'}
+            {#if room.allowUrlJoining}
                 <button type="button" aria-label="Copy join URL" class="copy-join-url-button align-center" onclick={copyJoinUrl} style="background-color: transparent; border: none;">
                     {@render copyIcon()}
                 </button>
             {/if}
         </div>
         <div class="info-item">
-            <strong>Total Members:</strong> {members!.length}
+            <strong>Total Members:</strong> {members.length}
         </div>
     </div>
     
@@ -243,7 +379,7 @@
 {/if}
         </div>
         <div class="members-list">
-            {#each members! as member}
+            {#each members as member}
                 <details class="member-item" name={member.uid}>
                     <summary>
                         <div class="align-center">
@@ -274,7 +410,7 @@
     
     <div class="room-actions">
         <h2>Actions</h2>
-        {#if members!.find(m => m.uid === user.uid)?.arrived}
+        {#if members.find(m => m.uid === user.uid)?.arrived}
             <button onclick={() => setArrived(false)} class="btn btn-warning">{@render houseIcon('currentColor')}Mark as not arrived</button>
         {:else}
             <button onclick={() => setArrived(true)} class="btn btn-success">{@render houseIcon('currentColor')}Mark as arrived</button>
@@ -289,7 +425,7 @@
     <div class="room-logs">
         <h2>Room Logs</h2>
         <ul class="log-list">
-            {#each formattedLogs! as log}
+            {#each formattedLogs as log}
                 <li class="log-item">
                     <span class="log-timestamp">{log.timestamp}</span>:
                     <span class="log-user">{log.performerName}</span> <span class="log-action">{log.action}{log.subjectName ? ` ${log.subjectName}` : ''}.</span>
@@ -297,6 +433,11 @@
             {/each}
         </ul>
     </div>
+    {:else}
+    <div class="loading-state">
+        <p>Loading room data...</p>
+    </div>
+    {/if}
 </div>
 
 <style>
@@ -530,5 +671,11 @@
 
     .copy-join-url-button:hover {
         background: var(--bg-primary);
+    }
+
+    .loading-state {
+        text-align: center;
+        padding: 2rem;
+        color: var(--text-secondary);
     }
 </style>
