@@ -2,9 +2,13 @@
 	import PasswordInput from '$lib/components/PasswordInput.svelte';
 	import ProfileAvatar from '$lib/components/ProfileAvatar.svelte';
 	import type { PageData } from './$types';
-	
+	import type Coordinates from '$lib/utils/geoUtils.ts';
+	import { CoordinateService } from '$lib/utils/geoUtils.ts';
+
+
 	let { data }: { data: PageData } = $props();
 	
+
 	let displayName = $state(data.user.displayName || '');
 	let profileURL = $state(data.user.profileURL || '');
 	let currentPassword = $state('');
@@ -17,6 +21,9 @@
 	let passwordMessage = $state('');
 	let profileError = $state('');
 	let passwordError = $state('');
+	let locationInput = $state('');
+	let locationMessage = $state('');
+	
 	
 	async function updateProfile() {
 		profileError = '';
@@ -118,6 +125,17 @@
 			isUpdatingPassword = false;
 		}
 	}
+  async function handleSetCoordinates() {
+    const result = await CoordinateService.setCoordinatesFromInput(locationInput);
+    locationMessage = result.message;
+  }
+	async function handleSetCoordinates2() {
+	const result = await CoordinateService.setCoordinatesFromlocation();
+	locationMessage = result.message;
+  }
+
+
+
 </script>
 
 <svelte:head>
@@ -230,7 +248,40 @@
 			</button>
 		</form>
 	</div>
-	
+	<div class="profile-section">
+		<div class="section-header">
+			<h2>Spawn coords</h2>
+			<p>Change your home location password</p>
+			
+
+			<div class="form-group">
+				<label for="Address">Address</label>
+				<input
+					id="address"
+					type="text"
+					bind:value={locationInput} 
+					placeholder="Enter your home address"
+					required
+				/>
+			</div>
+			
+			
+			<button class="update-btn" onclick={handleSetCoordinates}>
+			Set home location
+			</button>
+
+			<button class="update-btn" onclick={handleSetCoordinates2}>
+			Set home location to curent location
+			</button>
+
+			{#if locationMessage}
+			<div class="success-message">{locationMessage}</div>
+			{/if}
+
+		
+		</div>
+
+	</div>
 	<!-- Account Information Section -->
 	<div class="profile-section">
 		<div class="section-header">
