@@ -21,8 +21,8 @@
 	let passwordMessage = $state('');
 	let profileError = $state('');
 	let passwordError = $state('');
-	let locationInput: string
-	let locationMessage: string = '';
+	let locationInput = $state('');
+	let locationMessage = $state('');
 	
 	
 	async function updateProfile() {
