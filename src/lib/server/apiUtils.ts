@@ -99,15 +99,13 @@ export async function updateRoomMembership(
     
     // Aktualisiere Room-Members
     Object.entries(membershipChanges).forEach(([userId, role]) => {
+        room.members = room.members || {};
         if (role === null) {
-            room.members = room.members || {};
             delete room.members[userId];
-            updates[`users/${userId}/rooms/${roomRef.key}`] = null;
         } else {
-            room.members = room.members || {};
             room.members[userId] = role;
-            updates[`users/${userId}/rooms/${roomRef.key}`] = role;
         }
+        updates[`users/${userId}/rooms/${roomRef.key}`] = role;
     });
     
     // Update das Room-Object
