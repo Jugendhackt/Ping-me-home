@@ -217,14 +217,7 @@
 					<p>Manage your pending room invitations with style</p>
 				</div>
 			</div>
-			<button
-				class="back-btn glass-effect"
-				onclick={goBack}
-				in:fly={{ x: 50, duration: 600, delay: 400 }}
-			>
-				<span>←</span>
-				Dashboard
-			</button>
+			
 		</div>
 	</div>
 
@@ -263,7 +256,6 @@
 						class="invite-card glass-effect"
 						in:fly={{ y: 50, duration: 600, delay: 500 + index * 100 }}
 					>
-						<div class="card-glow"></div>
 						<div class="invite-header">
 							<div class="room-icon">
 								<div class="room-icon-bg"></div>
