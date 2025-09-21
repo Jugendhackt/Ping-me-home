@@ -160,9 +160,9 @@
     <div class="room-actions">
         <h2>Actions</h2>
         {#if members.filter(m => m.uid === user.uid).arrived}
-            <button onclick={() => setArrived(false)} class="not-arrived-button">{@render houseIcon('white')}Mark as not arrived</button>
+            <button onclick={() => setArrived(false)} class="not-arrived-button">{@render houseIcon('currentColor')}Mark as not arrived</button>
         {:else}
-            <button onclick={() => setArrived(true)} class="arrived-button">{@render houseIcon('white')}Mark as arrived</button>
+            <button onclick={() => setArrived(true)} class="arrived-button">{@render houseIcon('currentColor')}Mark as arrived</button>
         {/if}
         {#if isOwner}
             <button onclick={deleteRoom} class="delete-room-button">{@render deleteIcon('white')}Delete Room</button>
@@ -266,12 +266,12 @@
 
     .arrived-button {
         background-color: #4CAF50;
-        color: white;
+        color: black;
     }
 
     .not-arrived-button {
         background-color: #ff9800;
-        color: white;
+        color: black;
     }
 
     .copy-join-url-button {
