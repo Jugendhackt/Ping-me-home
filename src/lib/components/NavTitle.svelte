@@ -4,7 +4,6 @@
 	let backLink: string | undefined = $state();
 	let backLabel: string | undefined = $state();
 
-
 	$effect(() => {
 		switch(page.route.id) {
 			case '/app/room/[roomId]':

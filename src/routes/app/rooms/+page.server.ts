@@ -42,7 +42,7 @@ export const load: PageServerLoad = async ({ locals }) => {
                         name: roomData.name,
                         role: role as 'owner' | 'member' | 'invited',
                         allowUrlJoining: roomData.allowUrlJoining,
-                        memberCount: Object.keys(roomData.members).length
+                        memberCount: Object.keys(roomData.members).filter(m => roomData.members[m].role !== 'invited').length,
                     };
                 }
                 return null;
