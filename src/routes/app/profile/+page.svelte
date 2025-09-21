@@ -197,7 +197,7 @@
 				<small class="help-text">Leave empty to use auto-generated avatar</small>
 			</div>
 			
-			<button type="submit" class="update-btn" disabled={isUpdatingProfile}>
+			<button type="submit" class="btn btn-primary" style="align-self: flex-start;" disabled={isUpdatingProfile}>
 				{isUpdatingProfile ? 'Updating...' : 'Update Profile'}
 			</button>
 		</form>
@@ -242,7 +242,7 @@
 				placeholder="Confirm new password"
 			/>
 			
-			<button type="submit" class="update-btn danger" disabled={isUpdatingPassword}>
+			<button type="submit" class="btn btn-danger" style="align-self: flex-start" disabled={isUpdatingPassword}>
 				{isUpdatingPassword ? 'Updating...' : 'Change Password'}
 			</button>
 		</form>
@@ -425,36 +425,6 @@
 	.help-text {
 		color: var(--text-secondary);
 		font-size: 0.8rem;
-	}
-	
-	.update-btn {
-		background: var(--accent-color);
-		color: white;
-		border: none;
-		padding: 0.75rem 1.5rem;
-		border-radius: 6px;
-		cursor: pointer;
-		font-size: 0.9rem;
-		font-weight: 500;
-		transition: background-color 0.2s ease;
-		align-self: flex-start;
-	}
-	
-	.update-btn:hover:not(:disabled) {
-		background: var(--accent-hover);
-	}
-	
-	.update-btn:disabled {
-		opacity: 0.6;
-		cursor: not-allowed;
-	}
-	
-	.update-btn.danger {
-		background: #e74c3c;
-	}
-	
-	.update-btn.danger:hover:not(:disabled) {
-		background: #c0392b;
 	}
 	
 	.success-message {
