@@ -270,7 +270,7 @@
 			</button>
 
 			<button class="update-btn" onclick={handleSetCoordinates2}>
-			Set home location to curent location
+			Set home location to current location
 			</button>
 
 			{#if locationMessage}
