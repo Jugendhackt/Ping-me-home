@@ -222,7 +222,7 @@
     }
 
     .room-details, .members-section, .room-actions, .room-logs {
-        margin-bottom: .5rem;
+        margin-bottom: 1rem;
         padding: 1rem;
         border: 1px solid var(--border-color);
         border-radius: 8px;

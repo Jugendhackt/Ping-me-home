@@ -341,7 +341,7 @@
 		border: 1px solid var(--border-color);
 		border-radius: 12px;
 		padding: 1.5rem;
-		margin-bottom: 1.5rem;
+		margin-bottom: 1rem;
 	}
 	
 	.section-header {
