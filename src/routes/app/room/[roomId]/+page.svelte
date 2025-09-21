@@ -275,14 +275,14 @@
     <div class="room-actions">
         <h2>Actions</h2>
         {#if members!.find(m => m.uid === user.uid)?.arrived}
-            <button onclick={() => setArrived(false)} class="btn btn-warning">{@render houseIcon('currentColor')}Mark as not arrived</button>
+            <button onclick={() => setArrived(false)} class="btn btn-warning">{@render houseIcon('currentColor')}<span>Mark as not arrived</span></button>
         {:else}
-            <button onclick={() => setArrived(true)} class="btn btn-success">{@render houseIcon('currentColor')}Mark as arrived</button>
+            <button onclick={() => setArrived(true)} class="btn btn-success">{@render houseIcon('currentColor')}<span>Mark as arrived</span></button>
         {/if}
         {#if isOwner}
-            <button onclick={deleteRoom} class="btn btn-danger">{@render deleteIcon('white')}Delete Room</button>
+            <button onclick={deleteRoom} class="btn btn-danger">{@render deleteIcon('white')}<span>Delete Room</span></button>
         {:else}
-            <button onclick={leaveRoom} class="btn btn-danger">{@render doorIcon('white')}Leave Room</button>
+            <button onclick={leaveRoom} class="btn btn-danger">{@render doorIcon('white')}<span>Leave Room</span></button>
         {/if}
     </div>
 
@@ -530,5 +530,41 @@
 
     .copy-join-url-button:hover {
         background: var(--bg-primary);
+    }
+
+    @media (max-width: 600px) {
+        .room-actions {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 100;
+            background: transparent;
+            pointer-events: none;
+            box-shadow: none;
+            border-top: none;
+            border-color: transparent;
+            margin-bottom: 0;
+            width: 100vw;
+            max-width: 100vw;
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .room-actions h2 {
+            display: none;
+        }
+
+        .room-actions button {
+            margin-bottom: 0.5rem;
+            pointer-events: all;
+            margin: unset;
+        }
+
+        .room-actions button span {
+            display: none;
+        }
     }
 </style>
