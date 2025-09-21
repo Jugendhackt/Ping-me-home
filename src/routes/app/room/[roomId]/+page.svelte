@@ -3,14 +3,9 @@
     import ProfileAvatar from '$lib/components/ProfileAvatar.svelte';
     import type { PageData } from './$types';
     
-    export let data: PageData;
-    
-    $: room = data.room!;
-    $: roomId = data.roomId;
-    $: members = data.members!;
-    $: isOwner = data.isOwner;
-    $: user = data.user;
-    $: formattedLogs = data.formattedLogs!;
+    const { data } = $props();
+
+    let { room, roomId, members, isOwner, user, formattedLogs } = $derived(data);
 
     const copyJoinUrl = () => {
         const joinUrl = `${window.location.origin}/app/room/${roomId}/join`;
@@ -109,9 +104,11 @@
     };
 
     // Modal state for inviting members
-    let showInviteModal = false;
-    let inviteEmail = '';
-    let isInviting = false;
+    let showInviteModal = $state(false);
+    let inviteEmail = $state('');
+    let isInviting = $state(false);
+    let inviteError = $state('');
+    let inviteErrorColor = $state('red');
 
     const openInviteModal = () => {
         inviteEmail = '';
@@ -127,6 +124,7 @@
     const submitInvite = async () => {
         if (!inviteEmail.trim()) return;
         isInviting = true;
+        inviteError = '';
         try {
             const response = await fetch(`/api/room/${roomId}/invite-member`, {
                 method: 'POST',
@@ -136,14 +134,17 @@
                 body: JSON.stringify({ email: inviteEmail.trim() })
             });
             if (response.ok) {
-                alert('Invitation sent successfully.');
+                inviteErrorColor = 'green';
+                inviteError = 'Invitation sent successfully.';
                 closeInviteModal();
             } else {
-                alert('Failed to send invitation. Please try again.');
+                inviteErrorColor = 'red';
+                inviteError = 'Failed to send invitation. Please try again.';
             }
         } catch (error) {
+            inviteError = 'An error occurred. Please try again.';
+            inviteErrorColor = 'red';
             console.error('Error sending invitation:', error);
-            alert('An error occurred. Please try again.');
         } finally {
             isInviting = false;
         }
@@ -200,6 +201,7 @@
                         class="form-input"
                     />
                 </div>
+                <div class="invite-error" style="color: {inviteErrorColor}; display: {inviteError ? 'block' : 'none'};">{inviteError}</div>
                 <div class="modal-actions">
                     <button type="button" onclick={closeInviteModal} disabled={isInviting} class="btn btn-secondary">Cancel</button>
                     <button type="submit" disabled={isInviting || !inviteEmail.trim()} class="btn btn-primary">
