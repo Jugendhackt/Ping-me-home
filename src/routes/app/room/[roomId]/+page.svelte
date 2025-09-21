@@ -108,25 +108,44 @@
         });
     };
 
-    const inviteMember = () => {
-        const email = prompt('Enter the email address of the person you want to invite:');
-        if (email) {
-            fetch(`/api/room/${roomId}/invite-member`, {
+    // Modal state for inviting members
+    let showInviteModal = false;
+    let inviteEmail = '';
+    let isInviting = false;
+
+    const openInviteModal = () => {
+        inviteEmail = '';
+        showInviteModal = true;
+    };
+
+    const closeInviteModal = () => {
+        if (isInviting) return;
+        showInviteModal = false;
+        inviteEmail = '';
+    };
+
+    const submitInvite = async () => {
+        if (!inviteEmail.trim()) return;
+        isInviting = true;
+        try {
+            const response = await fetch(`/api/room/${roomId}/invite-member`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ email: email })
-            }).then(response => {
-                if (response.ok) {
-                    alert('Invitation sent successfully.');
-                } else {
-                    alert('Failed to send invitation. Please try again.');
-                }
-            }).catch(error => {
-                console.error('Error sending invitation:', error);
-                alert('An error occurred. Please try again.');
+                body: JSON.stringify({ email: inviteEmail.trim() })
             });
+            if (response.ok) {
+                alert('Invitation sent successfully.');
+                closeInviteModal();
+            } else {
+                alert('Failed to send invitation. Please try again.');
+            }
+        } catch (error) {
+            console.error('Error sending invitation:', error);
+            alert('An error occurred. Please try again.');
+        } finally {
+            isInviting = false;
         }
     };
 </script>
@@ -155,10 +174,46 @@
         <div class="members-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
             <h2>Members</h2>
             {#if isOwner}
-                <button class="icon-button" onclick={inviteMember} title="Invite Members">
+                <button class="icon-button" onclick={openInviteModal} title="Invite Members">
                     {@render addPersonIcon()}
                 </button>
             {/if}
+
+{#if showInviteModal}
+    <div class="modal-backdrop" onclick={closeInviteModal} role="dialog" aria-modal="true" tabindex="-1">
+        <div class="modal-content" onclick={(e) => e.stopPropagation()} role="document" tabindex="0">
+            <div class="modal-header">
+                <h2>Invite Member</h2>
+                <button class="modal-close" onclick={closeInviteModal} aria-label="Close modal">✕</button>
+            </div>
+            <form onsubmit={(e) => { e.preventDefault(); submitInvite(); }} class="modal-form">
+                <div class="form-group">
+                    <label for="invite-email">Email Address</label>
+                    <input
+                        id="invite-email"
+                        type="email"
+                        bind:value={inviteEmail}
+                        placeholder="Enter email address..."
+                        required
+                        maxlength="100"
+                        disabled={isInviting}
+                        class="form-input"
+                    />
+                </div>
+                <div class="modal-actions">
+                    <button type="button" onclick={closeInviteModal} disabled={isInviting} class="btn btn-secondary">Cancel</button>
+                    <button type="submit" disabled={isInviting || !inviteEmail.trim()} class="btn btn-primary">
+                        {#if isInviting}
+                            Sending...
+                        {:else}
+                            Send Invite
+                        {/if}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+{/if}
         </div>
         <div class="members-list">
             {#each members as member}
@@ -215,6 +270,122 @@
 </div>
 
 <style>
+    .modal-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        padding: 1rem;
+    }
+    .modal-content {
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        max-width: 400px;
+        width: 100%;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: var(--shadow-lg);
+        animation: modalSlideIn 0.2s ease-out;
+    }
+    @keyframes modalSlideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-20px) scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+    .modal-header {
+        padding: 1.5rem 1.5rem 0 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+    .modal-header h2 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+    }
+    .modal-close {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        color: var(--text-secondary);
+        cursor: pointer;
+        padding: 0.25rem;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+        line-height: 1;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .modal-close:hover {
+        background: var(--bg-hover);
+        color: var(--text-primary);
+    }
+    .modal-form {
+        padding: 1.5rem;
+    }
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    .form-group label {
+        display: block;
+        font-weight: 500;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+    .form-input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+        font-size: 1rem;
+        transition: all 0.2s ease;
+        box-sizing: border-box;
+    }
+    .form-input:focus {
+        outline: none;
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    .form-input:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+    .form-input::placeholder {
+        color: var(--text-muted);
+    }
+    .modal-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--border-color);
+    }
+    .modal-actions .btn {
+        min-width: 100px;
+        justify-content: center;
+    }
     .room-info {
         padding: 2rem;
         max-width: 800px;
