@@ -41,7 +41,7 @@
 	}
 
 	a:hover .back-arrow {
-		right: 7px;
+		right: 4px;
 	}
 
     @media (max-width: 768px) {		

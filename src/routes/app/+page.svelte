@@ -7,6 +7,7 @@
 	import { onValue, ref, type Unsubscribe } from 'firebase/database';
 	import { onDestroy, onMount } from 'svelte';
 	import type { PageData } from './$types';
+	import HoverTime from '$lib/components/HoverTime.svelte';
 
 	let { data }: { data: PageData } = $props();
 	
@@ -148,9 +149,7 @@
 					<div class="activity-text">
 						<span class="activity-title">Account Created</span>
 						<span class="activity-time">
-							{data.user.createdAt
-								? new Date(data.user.createdAt).toLocaleDateString()
-								: 'Recently'}
+							<HoverTime timestamp={data.user.createdAt} />
 						</span>
 					</div>
 				</div>
@@ -164,8 +163,7 @@
 						</div>
 						<div class="activity-text">
 							<span class="activity-title">Profile Updated</span>
-							<span class="activity-time">{new Date(data.user.updatedAt).toLocaleDateString()}</span
-							>
+							<span class="activity-time"><HoverTime timestamp={data.user.updatedAt} /></span>
 						</div>
 					</div>
 				{/if}
