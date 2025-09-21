@@ -249,7 +249,7 @@
                         <div class="align-center">
                             <ProfileAvatar displayName={member.displayName} profileURL={member.profileURL} />
                             <span class="member-name align-center">{member.displayName}{#if member.role === 'owner'}
-                                <span class="align-center" style="vertical-align: bottom; margin-left: 10px; display: contents;">{@render crownIcon('gold')}</span>
+                                <span class="align-center" style="margin-left: 5px;">{@render crownIcon('gold')}</span>
                             {/if}</span>
                         </div>
                         <div class="align-center">
