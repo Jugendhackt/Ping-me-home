@@ -174,14 +174,14 @@
 
     <div class="room-logs">
         <h2>Room Logs</h2>
-        <div class="log-list">
+        <ul class="log-list">
             {#each formattedLogs as log}
-                <div class="log-item">
+                <li class="log-item">
                     <span class="log-timestamp">{log.timestamp}</span>
                     <span class="log-user">{log.performerName}</span> <span class="log-action">{log.action}{log.subjectName ? ` ${log.subjectName}` : ''}.</span>
-                </div>
+                </li>
             {/each}
-        </div>
+        </ul>
     </div>
 </div>
 
@@ -192,12 +192,20 @@
         margin: 0 auto;
     }
 
-    .room-details, .members-section, .room-actions {
-        margin-bottom: 2rem;
+    .room-details, .members-section, .room-actions, .room-logs {
+        margin-bottom: .5rem;
         padding: 1rem;
         border: 1px solid var(--border-color);
         border-radius: 8px;
         background: var(--bg-secondary);
+    }
+
+    .room-logs {
+        font-family: 'Courier New', Courier, monospace;
+    }
+
+    .log-item {
+        margin-left: 1rem;
     }
 
     .info-item {
@@ -302,6 +310,7 @@
         border-radius: 4px;
         transition: background 0.2s;
     }
+
     .copy-join-url-button:hover {
         background: var(--bg-primary);
     }
