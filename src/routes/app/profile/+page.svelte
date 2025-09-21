@@ -1,9 +1,8 @@
 <script lang="ts">
 	import PasswordInput from '$lib/components/PasswordInput.svelte';
 	import ProfileAvatar from '$lib/components/ProfileAvatar.svelte';
+	import { CoordinateService } from '$lib/utils/geoUtils';
 	import type { PageData } from './$types';
-	import type Coordinates from '$lib/utils/geoUtils.ts';
-	import { CoordinateService } from '$lib/utils/geoUtils.ts';
 
 
 	let { data }: { data: PageData } = $props();
