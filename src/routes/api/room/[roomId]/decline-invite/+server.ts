@@ -14,8 +14,10 @@ export const POST: RequestHandler = async ({ params, locals }) => {
     });
 
     const userRef = ref(db, `users/${user.uid}`);
-    user.pendingInvites = user.pendingInvites?.filter(invite => invite !== params.roomId) || [];
-    update(userRef, user);
+    const updatedPendingInvites = user.pendingInvites?.filter(invite => invite !== params.roomId) || [];
+    await update(userRef, {
+        pendingInvites: updatedPendingInvites
+    });
 
     await logRoomAction(room, roomRef, user.uid, 'declined the invite');
 

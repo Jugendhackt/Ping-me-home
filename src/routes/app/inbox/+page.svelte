@@ -35,8 +35,11 @@
 				const userData = snapshot.val() as User;
 				currentUser = userData;
 				
+				console.log('User data updated:', userData.pendingInvites);
+				
 				// Fetch updated invite data when pending invites change
-				if (userData.pendingInvites) {
+				if (userData.pendingInvites && userData.pendingInvites.length > 0) {
+					console.log('Processing pending invites:', userData.pendingInvites);
 					const updatedInvites = await Promise.all(
 						userData.pendingInvites.map(async (roomId: string) => {
 							try {
@@ -77,7 +80,10 @@
 					
 					// Filter out null results (rooms that don't exist)
 					pendingInvites = updatedInvites.filter(invite => invite !== null);
+					console.log('Updated pending invites:', pendingInvites);
 				} else {
+					// Clear invites if no pending invites exist
+					console.log('No pending invites, clearing list');
 					pendingInvites = [];
 				}
 			}
@@ -102,8 +108,9 @@
 			});
 			
 			if (response.ok) {
-				// No need to reload, real-time listener will update the data
-				console.log('Invite accepted successfully');
+				// Immediately remove the invite from UI
+				pendingInvites = pendingInvites.filter(invite => invite.roomId !== roomId);
+				console.log('Invite accepted successfully and removed from UI');
 			} else {
 				const error = await response.json();
 				alert(`Error accepting invite: ${error.message || 'Unknown error'}`);
@@ -129,8 +136,9 @@
 			});
 			
 			if (response.ok) {
-				// No need to reload, real-time listener will update the data
-				console.log('Invite declined successfully');
+				// Immediately remove the invite from UI
+				pendingInvites = pendingInvites.filter(invite => invite.roomId !== roomId);
+				console.log('Invite declined successfully and removed from UI');
 			} else {
 				const error = await response.json();
 				alert(`Error declining invite: ${error.message || 'Unknown error'}`);
@@ -166,9 +174,6 @@
 					<p>Manage your pending room invitations</p>
 				</div>
 			</div>
-			<button class="back-btn" onclick={goBack}>
-				← Back to Dashboard
-			</button>
 		</div>
 	</div>
 
@@ -209,7 +214,7 @@
 								{/if}
 								<div class="room-meta">
 									<span class="member-count">
-										{Object.keys(invite.room.members).length} member{Object.keys(invite.room.members).length !== 1 ? 's' : ''}
+										{Object.values(invite.room.members).filter(member => member.role !== 'invited').length} member{Object.values(invite.room.members).filter(member => member.role !== 'invited').length !== 1 ? 's' : ''}
 									</span>
 									{#if invite.room.allowUrlJoining}
 										<span class="join-method">Public joining allowed</span>
