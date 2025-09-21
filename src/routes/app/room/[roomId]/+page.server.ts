@@ -50,16 +50,28 @@ export const load: PageServerLoad = async ({ params, locals }) => {
             }
         }
 
-        const formattedLogs = room.logs.map(log => {
+        const formattedLogs = await Promise.all(room.logs.map(async log => {
             const performer = members.find(m => m.uid === log.performerId);
+            // get subject name, try to get from members first, then fallback to user data
             const subject = log.subjectId ? members.find(m => m.uid === log.subjectId) : null;
+            let subjectName = subject ? subject.displayName : null;
+            if (!subjectName && log.subjectId) {
+                const subjectRef = ref(db, `users/${log.subjectId}`);
+                const subjectSnap = await get(subjectRef);
+                if (subjectSnap.exists()) {
+                    const subjectData = subjectSnap.val();
+                    subjectName = subjectData.displayName || 'Unknown User';
+                } else {
+                    subjectName = 'N/A (Failed to load user data)';
+                }
+            }
             return {
                 timestamp: new Date(log.timestamp).toLocaleString(),
                 action: log.action,
                 performerName: performer ? performer.displayName : 'Unknown User',
-                subjectName: subject ? subject.displayName : undefined,
+                subjectName: subjectName,
             };
-        });
+        }));
 
         return {
             room: room,
