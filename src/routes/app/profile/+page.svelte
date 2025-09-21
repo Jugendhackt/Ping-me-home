@@ -129,6 +129,10 @@
     const result = await CoordinateService.setCoordinatesFromInput(locationInput);
     locationMessage = result.message;
   }
+	async function handleSetCoordinates2() {
+	const result = await CoordinateService.setCoordinatesFromlocation();
+	locationMessage = result.message;
+  }
 
 
 
@@ -263,7 +267,11 @@
 			
 			
 			<button class="update-btn" onclick={handleSetCoordinates}>
-			Set location
+			Set home location
+			</button>
+
+			<button class="update-btn" onclick={handleSetCoordinates2}>
+			Set home location to curent location
 			</button>
 
 			{#if locationMessage}

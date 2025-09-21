@@ -140,4 +140,23 @@ export class CoordinateService {
     message = 'Adresse konnte nicht gefunden werden oder ist ungültig.';
     return { coords: null, message };
   }
+
+
+
+    static async setCoordinatesFromlocation(): Promise<{ coords: Coordinates | null; message: string }> {
+        let message = '';
+        let coords: Coordinates | null = null;
+
+
+        coords = await this.getCurrentPosition();
+        if (coords) {
+        this.saveCoordinates(coords);
+        message = `Koordinaten übernommen: ${coords.lat}, ${coords.lng}`;
+        return { coords, message };
+        }
+
+        message = 'Standort ungültig.';
+        return { coords: null, message };
+    }
 }
+
