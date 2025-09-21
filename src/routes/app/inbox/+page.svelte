@@ -12,7 +12,16 @@
 	
 	// Reactive state for real-time updates
 	let currentUser = $state<User>(data.user);
-	let pendingInvites = $state(data.pendingInvites);
+	let pendingInvites = $state<{
+		roomId: string;
+		room: Room;
+		owner: {
+			uid: string;
+			displayName?: string | null;
+			email?: string | null;
+			profileURL?: string | null;
+		} | null;
+	}[]>(data.pendingInvites);
 	let isLoading = $state(false);
 	let actionInProgress = $state<{ roomId: string; action: 'accept' | 'decline' } | null>(null);
 	let unsubscribe: Unsubscribe | null = null;
