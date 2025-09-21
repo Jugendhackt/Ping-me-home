@@ -249,13 +249,13 @@
                         <div class="align-center">
                             <ProfileAvatar displayName={member.displayName} profileURL={member.profileURL} />
                             <span class="member-name align-center">{member.displayName}{#if member.role === 'owner'}
-                                {@render crownIcon('gold')}
+                                <span class="align-center" style="margin-left: 5px;">{@render crownIcon('gold')}</span>
                             {/if}</span>
                         </div>
                         <div class="align-center">
-                            {#if isOwner && member.uid !== user.uid}
+                            {#if isOwner && member.uid !== user.uid && member.role !== 'owner' }
                             <button class="icon-button" onclick={() => makeOwner(member)}>
-                                {@render crownIcon('gold')}
+                                {@render crownIcon()}
                             </button>
                             <button class="icon-button" onclick={() => kick(member)}>
                                 {@render kickIcon()}
@@ -432,6 +432,8 @@
 
     .room-logs {
         font-family: 'Courier New', Courier, monospace;
+        max-height: 250px;
+        overflow-y: auto;
     }
 
     .log-item {
