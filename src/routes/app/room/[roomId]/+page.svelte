@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { addPersonIcon, copyIcon, crownIcon, deleteIcon, doorIcon, houseIcon, kickIcon } from '$lib/components/Icons.svelte';
-    import ProfileAvatar from '$lib/components/ProfileAvatar.svelte';
-    import type { PageData } from './$types';
+	import ProfileAvatar from '$lib/components/ProfileAvatar.svelte';
     
     const { data } = $props();
 
@@ -72,7 +71,7 @@
             }).then(response => {
                 if (response.ok) {
                     // Remove the kicked member from the UI
-                    members = members.filter((m: { uid: string }) => m.uid !== member.uid);
+                    members = members!.filter((m: { uid: string }) => m.uid !== member.uid);
                 } else {
                     alert('Failed to kick member. Please try again.');
                 }
@@ -93,7 +92,7 @@
         }).then(response => {
             if (response.ok) {
                 // Update the member's arrived status in the UI
-                members = members.map(m => m.uid === user.uid ? { ...m, arrived } : m);
+                members = members!.map(m => m.uid === user.uid ? { ...m, arrived } : m);
             } else {
                 alert('Failed to update arrival status. Please try again.');
             }
@@ -152,22 +151,22 @@
 </script>
 
 <div class="room-info">
-    <h1>{room.name}</h1>
+    <h1>{room!.name}</h1>
     <div class="room-details">
         <h2>Room Information</h2>
         <div class="info-item">
             <strong>Room ID:</strong> {roomId}
         </div>
         <div class="info-item">
-            <strong>URL Joining Allowed:</strong> {room.allowUrlJoining ? 'Yes' : 'No'}
-            {#if room.allowUrlJoining}
+            <strong>URL Joining Allowed:</strong> {room!.allowUrlJoining ? 'Yes' : 'No'}
+            {#if room!.allowUrlJoining}
                 <button type="button" aria-label="Copy join URL" class="copy-join-url-button align-center" onclick={copyJoinUrl} style="background-color: transparent; border: none;">
                     {@render copyIcon()}
                 </button>
             {/if}
         </div>
         <div class="info-item">
-            <strong>Total Members:</strong> {members.length}
+            <strong>Total Members:</strong> {members!.length}
         </div>
     </div>
     
@@ -218,7 +217,7 @@
 {/if}
         </div>
         <div class="members-list">
-            {#each members as member}
+            {#each members! as member}
                 <details class="member-item" name={member.uid}>
                     <summary>
                         <div class="align-center">
@@ -246,7 +245,7 @@
     
     <div class="room-actions">
         <h2>Actions</h2>
-        {#if members.find(m => m.uid === user.uid)?.arrived}
+        {#if members!.find(m => m.uid === user.uid)?.arrived}
             <button onclick={() => setArrived(false)} class="btn btn-warning">{@render houseIcon('currentColor')}Mark as not arrived</button>
         {:else}
             <button onclick={() => setArrived(true)} class="btn btn-success">{@render houseIcon('currentColor')}Mark as arrived</button>
@@ -261,7 +260,7 @@
     <div class="room-logs">
         <h2>Room Logs</h2>
         <ul class="log-list">
-            {#each formattedLogs as log}
+            {#each formattedLogs! as log}
                 <li class="log-item">
                     <span class="log-timestamp">{log.timestamp}</span>:
                     <span class="log-user">{log.performerName}</span> <span class="log-action">{log.action}{log.subjectName ? ` ${log.subjectName}` : ''}.</span>
