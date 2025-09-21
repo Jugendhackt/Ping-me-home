@@ -181,7 +181,7 @@
     <div class="room-details">
         <h2>Room Information</h2>
         <div class="info-item">
-            <strong>Room ID:</strong> {roomId}
+            <strong>Room ID:</strong> <code>{roomId}</code>
         </div>
         <div class="info-item">
             <strong>URL Joining Allowed:</strong> {room!.allowUrlJoining ? 'Yes' : 'No'}
@@ -442,6 +442,13 @@
 
     .info-item {
         margin-bottom: 0.5rem;
+    }
+    
+    .info-item code {
+        background: var(--bg-primary);
+        padding: 2px 4px;
+        border-radius: 4px;
+        font-family: 'Courier New', Courier, monospace;
     }
 
     .members-list {
